@@ -12,9 +12,14 @@ class GraphicsSource : public QObject {
     Q_OBJECT
 public:
     GraphicsSource(QObject* parent = nullptr);
+    void init();
+protected:
+    void draw_point_imp(double x, double y);
 signals:
-    void draw_point(int x, int y);
+    void draw_point(QGraphicsEllipseItem*);
     void plot_function(Function*);
+private:
+    QGraphicsEllipseItem* m_prev_point;
 };
 
 
@@ -39,7 +44,7 @@ public:
 
     void set_source(GraphicsSource*);
 public slots:
-    void draw_point(int x, int y);
+    void draw_point(QGraphicsEllipseItem*);
     void plot_function(Function*);
 private:
     GraphicsSource* m_source;

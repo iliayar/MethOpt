@@ -1,5 +1,6 @@
 #include <QGraphicsView>
 #include <QMainWindow>
+#include <QGraphicsEllipseItem>
 #include <iostream>
 
 #include "function.hpp"
@@ -20,18 +21,8 @@ Lab1Window::Lab1Window(QWidget* parent)
     m_scene = scene;
 }
 
-void Lab1Window::draw_point(int x, int y) {
-    QPen pen{};
-    QColor color(Qt::red);
-    color.setAlpha(160);
-    pen.setStyle(Qt::SolidLine);
-    pen.setWidth(1);
-    pen.setColor(color);
-    QBrush brush{};
-    brush.setColor(color);
-    brush.setStyle(Qt::SolidPattern);
-    m_scene->addEllipse(x, y, 0.5, 0.5, pen, brush);
-
+void Lab1Window::draw_point(QGraphicsEllipseItem* item) {
+    m_scene->addItem(item);
 }
 
 void Lab1Window::plot_function(Function* f) {
@@ -65,11 +56,50 @@ void Lab1Window::set_source(GraphicsSource* source) {
             &Lab1Window::draw_point);
     connect(m_source, &GraphicsSource::plot_function, this,
             &Lab1Window::plot_function);
+    m_source->init();
 }
 
 Lab1Window::~Lab1Window() {}
 
-GraphicsSource::GraphicsSource(QObject* parent) : QObject(parent) {
+GraphicsSource::GraphicsSource(QObject* parent) : QObject(parent), m_prev_point(nullptr) {
+}
+
+void GraphicsSource::draw_point_imp(double x, double y) {
+    QPen pen{};
+    QColor color(Qt::red);
+    color.setAlpha(160);
+    pen.setStyle(Qt::SolidLine);
+    pen.setWidth(1);
+    pen.setColor(color);
+    QBrush brush{};
+    brush.setColor(color);
+    brush.setStyle(Qt::SolidPattern);
+
+    QGraphicsEllipseItem* new_point = new QGraphicsEllipseItem(x, y, 0.5, 0.5);
+    new_point->setPen(pen);
+    new_point->setBrush(brush);
+
+    emit draw_point(new_point);
+
+    if (m_prev_point != nullptr) {
+        QPen prev_pen{};
+        QColor prev_color(Qt::gray);
+        prev_color.setAlpha(160);
+        prev_pen.setStyle(Qt::SolidLine);
+        prev_pen.setWidth(1);
+        prev_pen.setColor(prev_color);
+        QBrush prev_brush{};
+        prev_brush.setColor(prev_color);
+        prev_brush.setStyle(Qt::SolidPattern);
+        m_prev_point->setPen(prev_pen);
+        m_prev_point->setBrush(prev_brush);
+    }
+
+    m_prev_point = new_point;
+}
+
+void GraphicsSource::init() {
+        emit plot_function(new Parabola());
 }
 
 TestGraphicsSource::TestGraphicsSource(QObject* parent)
@@ -79,9 +109,6 @@ TestGraphicsSource::TestGraphicsSource(QObject* parent)
 }
 
 void TestGraphicsSource::timeout() {
-    if (m_x < 0.2) {
-        emit plot_function(new Parabola());
-    }
-    emit draw_point(m_x, m_x * m_x);
+    draw_point_imp(m_x, m_x * m_x);
     m_x += 0.2;
 }
