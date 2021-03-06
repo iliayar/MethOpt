@@ -1,14 +1,18 @@
 #include "optimizer.hpp"
 
-GoldenRation::GoldenRation(double xl, double xr, double eps)
+
+template<typename T>
+GoldenRation<T>::GoldenRation(T xl, T xr, T eps)
     : m_xr(xr), m_xl(xl), m_eps(eps) {
     
 }
 
-bool GoldenRation::forward() {
+template<typename T>
+bool GoldenRation<T>::forward() {
     return false;
 }
 
-double GoldenRation::get_min() {
+template<typename T>
+T GoldenRation<T>::get_min() {
     return 0;
 }

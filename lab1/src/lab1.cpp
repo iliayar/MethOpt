@@ -1,13 +1,13 @@
-#include "lab1.hpp"
+#include "lab1ui.hpp"
 #include "function.hpp"
 
 #include <QApplication>
 
-Q_DECLARE_METATYPE(Function*)
+Q_DECLARE_METATYPE(Function<double>*)
 
 int main(int argc, char *argv[]) {
 
-    qRegisterMetaType<Function*>();
+    qRegisterMetaType<Function<double>*>();
     
     QApplication app(argc, argv);
 
