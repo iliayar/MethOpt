@@ -5,6 +5,8 @@
 
 #include "function.hpp"
 
+#define EPS static_cast<T>(1e-5)
+
 enum class DataType {
     Interval,
     Point,
@@ -56,20 +58,12 @@ private:
 template<typename T>
 class Optimizer {
 public:
+    Optimizer(Function<T>* function) : m_function(function) {}
     virtual bool forward() = 0;
-    virtual std::vector<std::shared_ptr<IterationData<T>>> get_data() = 0;
-    virtual T get_min() = 0;
-};
+    virtual std::vector<IterationData<T>*> get_data() = 0;
+    virtual std::pair<T, T> get_min() = 0;
 
-template<typename T>
-class GoldenRation {
-public:
-    GoldenRation(T, T, T);
-    bool forward();
-    T get_min();
-    std::vector<std::shared_ptr<IterationData<T>>> get_data();
-private:
-    double m_xr;
-    double m_xl;
-    double m_eps;
+    Function<T>* get_function() { return m_function; }
+protected:
+    Function<T>* m_function;
 };

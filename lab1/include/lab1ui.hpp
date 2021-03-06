@@ -6,16 +6,23 @@
 #include <QGraphicsItem>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
+#include <QPushButton>
+#include <QComboBox>
+#include <QDoubleSpinBox>
 #include <iostream>
 
 #include "function.hpp"
 #include "optimizer.hpp"
+#include "methods.hpp"
+
+Q_DECLARE_METATYPE(Method)
 
 #define SCALE 4
 #define PLOT_STEP 0.1
+#define ITERATION_INTERVAL 500
 
 template <typename T>
-void set_color(T* item, QColor color, int width = 1, int alpha = 255) {
+void set_pen(T* item, QColor color, int width = 1, int alpha = 255) {
     QPen pen{};
     color.setAlpha(alpha);
     pen.setStyle(Qt::SolidLine);
@@ -39,11 +46,26 @@ QRectF scale_rect(QRectF, double);
 class GraphicsSource : public QObject {
     Q_OBJECT
 public:
-    GraphicsSource(QObject* parent = nullptr);
+    GraphicsSource(QObject* parent = nullptr)
+        : QObject(parent), m_auto_iteration(false), m_timer() {}
     void init(QGraphicsScene* scene) {
         m_scene_rect = scale_rect(scene->sceneRect(), SCALE);
         std::cout << m_scene_rect.left() << " " << m_scene_rect.top() << " " << m_scene_rect.width() << " " << m_scene_rect.height() << std::endl;
+        connect(&m_timer, &QTimer::timeout, this, &GraphicsSource::timeout);
         init_imp();
+    }
+
+    virtual void next_iteration() = 0;
+
+public slots:
+    void start_auto_iteration() {
+        m_timer.start(ITERATION_INTERVAL);
+    }
+    void stop_auto_iteration() {
+        m_timer.stop();
+    }
+    void timeout() {
+        next_iteration();
     }
 protected:
     virtual void init_imp() = 0;
@@ -53,9 +75,6 @@ protected:
         for(QGraphicsItem* item : m_prev_items) {
             emit remove_item(item);
             delete item;
-            // QPainter* painter = new QPainter();
-            // set_color(painter, Qt::gray);
-            // item->paint(painter, new QStyleOptionGraphicsItem());
         }
         m_prev_items.clear();
         for(IterationData<T>* d : data) {
@@ -103,20 +122,8 @@ signals:
 protected:
     QRectF m_scene_rect;
     std::vector<QGraphicsItem*> m_prev_items;
-};
-
-
-class TestGraphicsSource : public GraphicsSource {
-    Q_OBJECT
-public:
-    TestGraphicsSource(QObject* parent = nullptr);
-    void init_imp();
-public slots:
-    void timeout();
-private:
-    QTimer* m_timer;
-    double m_x;
-    Parabola<double> m_function;
+    bool m_auto_iteration;
+    QTimer m_timer;
 };
 
 class Lab1Window : public QMainWindow {
@@ -129,8 +136,15 @@ public:
 public slots:
     void add_item(QGraphicsItem*);
     void remove_item(QGraphicsItem*);
+    void choose_method();
 private:
     GraphicsSource* m_source;
     QGraphicsScene* m_scene;
-};
+    QPushButton* m_next_button;
+    QPushButton* m_start_button;
+    QPushButton* m_stop_button;
+    QDoubleSpinBox* m_left_spin;
+    QDoubleSpinBox* m_right_spin;
+    QComboBox* m_methods_combo;
 
+};
