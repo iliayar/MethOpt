@@ -1,3 +1,7 @@
+/**
+ * @file function.hpp
+ * Here we implements a simple intefrace to work with different functions
+ */
 #pragma once
 
 #include <memory>
