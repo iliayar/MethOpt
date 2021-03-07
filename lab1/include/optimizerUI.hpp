@@ -2,6 +2,15 @@
 
 #include "lab1ui.hpp"
 
+/**
+ * General implementation of {@link GraphicsSouce} for {@link Optimizer} interface
+ * @code
+ * Lab1Window* w = ...
+ * w.set_source(new OptimizationGraphicsSource<DichotomyMethod<double>, double>(new Parabola<double>(), -40, -5));
+ * @encode
+ * @tparam O Optimizer class 
+ * @tparam T All numeric values type
+ */
 template<class O, typename T>
 class OptimizationGraphicsSource : public GraphicsSource {
 public:

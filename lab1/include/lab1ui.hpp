@@ -1,3 +1,7 @@
+/**
+ * @file lab1ui.hpp
+ * Contains the main GUI classes and some hepler functions
+ */
 #pragma once
 
 #include <QMainWindow>
@@ -43,6 +47,9 @@ void set_brush(T* item, QColor color, int alpha = 255) {
 
 QRectF scale_rect(QRectF, double);
 
+/**
+ * The abstract class provides connecting the minimizer and visualization widget
+ */ 
 class GraphicsSource : public QObject {
     Q_OBJECT
 public:
