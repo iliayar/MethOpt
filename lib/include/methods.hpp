@@ -6,7 +6,11 @@
 #include <algorithm>
 
 enum class Method {
-    Dichotomy
+    Dichotomy,
+    GoldenSection,
+    Fibonacci,
+    Parabolas,
+    Brent
 };
 
 template <typename T>
@@ -38,7 +42,7 @@ public:
     }
     std::vector<IterationData<T>*> get_data() {
         return {new IterationPoint<T>(m_x1, m_fx1),
-                new IterationInterval<T>(m_a, m_b)};
+            new IterationInterval<T>(m_a, m_b)};
     }
 
 private:
@@ -55,6 +59,7 @@ class GoldenSectionMethod : public Optimizer<T> {
 private:
     const T const2 = static_cast<double>((sqrt(5) - 1) / 2);
     T a, b, sigma, x1, x2, f_x1, f_x2;
+public:
     GoldenSectionMethod(Function<T>* function, T a, T b, T eps = EPS)
         : Optimizer<T>(function), a(a), b(b), sigma(eps) {
         x1 = b - const2 * (b - a);
@@ -84,7 +89,7 @@ private:
         return std::make_pair(x, (*this->m_function)(x));
     }
     std::vector<IterationData<T>*> get_data() {
-        return {}; // :TODO:
+        return {new IterationInterval<T>(a, b)}; // :TODO:
     }
 };
 
@@ -94,6 +99,7 @@ private:
     T a, b, sigma, x1, x2, f_x1, f_x2;
     int k = 0, n;
     std::vector<T> fib;
+public:
     FibonacciMethod(Function<T>* function, T a, T b, T eps = EPS)
         : Optimizer<T>(function), a(a), b(b), sigma(eps) {
         fib.resize(100, 0);
@@ -138,7 +144,7 @@ private:
         return std::make_pair(x, (*this->m_function)(x));
     }
     std::vector<IterationData<T>*> get_data() {
-        return {}; // :TODO:
+        return {new IterationInterval<T>(a, b)}; // :TODO:
     }
 };
 
@@ -146,19 +152,20 @@ template <typename T>
 class ParabolasMethod : public Optimizer<T> {
 private:
     T a, b, sigma, x2, x_res, f_a, f_b, f_x2;
+public:
     ParabolasMethod(Function<T>* function, T a, T b, T eps = EPS)
         : Optimizer<T>(function), a(a), b(b), sigma(eps) {
         x2 = (a + b) / 2;
         x_res = a;
-        f_a = f(a);
-        f_b = f(b);
-        f_x2 = f(x2);
+        f_a  = (*this->m_function)(a);
+        f_b  = (*this->m_function)(b);
+        f_x2 = (*this->m_function)(x2);
     }
     bool forward() {
         T u =
             x2 - ((x2 - a) * (x2 - a) * (f_x2 - f_b) -
                   (x2 - b) * (x2 - b) * (f_x2 - f_a)) /
-                     ((x2 - a) * (f_x2 - f_b) - (x2 - b) * (f_x2 - f_a)) / 2;
+            ((x2 - a) * (f_x2 - f_b) - (x2 - b) * (f_x2 - f_a)) / 2;
         T f_u = (*this->m_function)(u);
         if (abs(u - x_res) < sigma) {
             return false;
@@ -188,12 +195,13 @@ private:
                 x_res = u;
             }
         }
+        return true;
     }
     std::pair<T, T> get_min() {
         return std::make_pair(x_res, (*this->m_function)(x_res));
     }
     std::vector<IterationData<T>*> get_data() {
-        return {}; // :TODO:
+        return {new IterationInterval<T>(a, b)}; // :TODO:
     }
 };
 
@@ -209,10 +217,11 @@ private:
     T tol1, tol2, u, v, w, x;
     T tol = 3e-8;
     T e = 0.0;
+public:
     BrentMethod(Function<T>* function, T a, T b, T eps = EPS)
         : Optimizer<T>(function), a(a), b(b), sigma(eps) {
         x = w = v = b;
-        fw = fv = fx = f(x);
+        fw = fv = fx = (*this->m_function)(x);
     }
     bool forward() {
         T xm = 0.5 * (a + b);
@@ -241,7 +250,7 @@ private:
             d = golden_sec_const * (e = (x >= xm ? a - x : b - x));
         }
         u = (abs(d) >= tol1 ? x + d : x + tol1);
-        fu = f(u);
+        fu = (*this->m_function)(u);
         if (fu <= fx) {
             v = w;
             w = x;
@@ -268,6 +277,6 @@ private:
         return std::make_pair(x, (*this->m_function)(x));
     }
     std::vector<IterationData<T>*> get_data() {
-        return {}; // :TODO:
+        return {new IterationInterval<T>(a, b)}; // :TODO:
     }
 };

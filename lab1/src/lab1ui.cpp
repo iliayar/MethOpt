@@ -1,18 +1,18 @@
 #include "lab1ui.hpp"
 
-#include <QGraphicsEllipseItem>
-#include <QGraphicsView>
-#include <QMainWindow>
-#include <QPushButton>
-#include <QGroupBox>
-#include <QLayout>
-#include <QFrame>
 #include <QComboBox>
 #include <QDoubleSpinBox>
+#include <QFrame>
+#include <QGraphicsEllipseItem>
+#include <QGraphicsView>
+#include <QGroupBox>
 #include <QLabel>
-#include "QVariant"
+#include <QLayout>
+#include <QMainWindow>
+#include <QPushButton>
 #include <iostream>
 
+#include "QVariant"
 #include "function.hpp"
 #include "methods.hpp"
 #include "optimizerUI.hpp"
@@ -91,9 +91,19 @@ Lab1Window::Lab1Window(QWidget* parent)
     left_spin->setRange(scaled_rect.left(), scaled_rect.right());
     right_spin->setRange(scaled_rect.left(), scaled_rect.right());
 
-    methods_combo->addItem("Метод дихотомии", QVariant::fromValue<Method>(Method::Dichotomy));
+    methods_combo->addItem("Метод дихотомии",
+                           QVariant::fromValue<Method>(Method::Dichotomy));
+    methods_combo->addItem("Метод золотого сечения",
+                           QVariant::fromValue<Method>(Method::GoldenSection));
+    methods_combo->addItem("Метод Фибоначчи",
+                           QVariant::fromValue<Method>(Method::Fibonacci));
+    methods_combo->addItem("Метод парабол",
+                           QVariant::fromValue<Method>(Method::Parabolas));
+    methods_combo->addItem("Метод Брента",
+                           QVariant::fromValue<Method>(Method::Brent));
 
-    connect(options_button, &QPushButton::clicked, this, &Lab1Window::choose_method);
+    connect(options_button, &QPushButton::clicked, this,
+            &Lab1Window::choose_method);
 
     setCentralWidget(main_box);
 
@@ -114,7 +124,32 @@ void Lab1Window::choose_method() {
         case Method::Dichotomy: {
             set_source(
                 new OptimizationGraphicsSource<DichotomyMethod<double>, double>(
-                    new Parabola<double>, left, right));
+                    new Var2Function<double>, left, right));
+            break;
+        }
+        case Method::Fibonacci: {
+            set_source(
+                new OptimizationGraphicsSource<FibonacciMethod<double>, double>(
+                    new Var2Function<double>, left, right));
+            break;
+        }
+        case Method::Brent: {
+            set_source(
+                new OptimizationGraphicsSource<BrentMethod<double>, double>(
+                    new Var2Function<double>, left, right));
+            break;
+        }
+        case Method::Parabolas: {
+            set_source(
+                new OptimizationGraphicsSource<ParabolasMethod<double>, double>(
+                    new Var2Function<double>, left, right));
+            break;
+        }
+        case Method::GoldenSection: {
+            set_source(
+                new OptimizationGraphicsSource<GoldenSectionMethod<double>,
+                                               double>(new Var2Function<double>,
+                                                       left, right));
             break;
         }
     }

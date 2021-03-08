@@ -60,6 +60,13 @@ public:
 };
 
 template<typename T>
+class Var2Function : public Function<T> {
+public:
+    Var2Function() { }
+    T operator()(T x) { return x*x; }; // :FIXME:
+};
+
+template<typename T>
 Function<double>* Function<T>::to_double() {
     return new StdFunction<double>([this](double x) {
         return static_cast<double>((*this)(static_cast<T>(x)));

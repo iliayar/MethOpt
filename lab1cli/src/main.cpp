@@ -8,7 +8,7 @@ void print_data_json(std::vector<IterationData<double>*> data) {
     int i = 0;
     std::cout << "{ \"type\": \"iteration\", \"data\": [ ";
     for (IterationData<double>* d : data) {
-        if(i != 0) {
+        if (i != 0) {
             std::cout << ", ";
         }
         i++;
@@ -36,17 +36,39 @@ void print_data_json(std::vector<IterationData<double>*> data) {
     std::cout << " ] }" << std::endl;
 }
 
-int fired_main(std::string method = fire::arg({"-m", "--method", "Optimization method. Avaliable: dichotomy"}, "dichotomy"),
-               double left = fire::arg({"-l", "--left", "Left bound of range"}, -10.0),
-               double right = fire::arg({"-r", "--right", "Right bound of range"}, 10.0),
-               fire::optional<double> eps = fire::arg({"-e", "--epsilon", "Precision to find minimum til"})) {
+int fired_main(
+    std::string method =
+        fire::arg({"-m", "--method",
+                   "Optimization method. Avaliable: dichotomy, parabolas, "
+                   "brent, goldensections, fibonacci"},
+                  "dichotomy"),
+    double left = fire::arg({"-l", "--left", "Left bound of range"}, -10.0),
+    double right = fire::arg({"-r", "--right", "Right bound of range"}, 10.0),
+    fire::optional<double> eps = fire::arg({"-e", "--epsilon",
+                                            "Precision to find minimum til"})) {
     Optimizer<double>* optimzier;
     if (method == "dichotomy") {
-        optimzier = new DichotomyMethod<double>(new Parabola<double>(), left,
-                                                right, eps.value_or(1e-5));
+        optimzier = new DichotomyMethod<double>(
+            new Var2Function<double>(), left, right, eps.value_or(1e-5));
+    }
+    if (method == "parabolas") {
+        optimzier = new ParabolasMethod<double>(
+            new Var2Function<double>(), left, right, eps.value_or(1e-5));
+    }
+    if (method == "brent") {
+        optimzier = new BrentMethod<double>(new Var2Function<double>(), left,
+                                            right, eps.value_or(1e-5));
+    }
+    if (method == "goldensections") {
+        optimzier = new GoldenSectionMethod<double>(
+            new Var2Function<double>(), left, right, eps.value_or(1e-5));
+    }
+    if (method == "fibonacci") {
+        optimzier = new FibonacciMethod<double>(
+            new Var2Function<double>(), left, right, eps.value_or(1e-5));
     }
 
-    if(optimzier == nullptr) {
+    if (optimzier == nullptr) {
         std::cerr << "No such method: " << method << std::endl;
         return -1;
     }
