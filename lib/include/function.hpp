@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <functional>
+#include <cmath>
 
 template<typename T>
 class StdFunction;
@@ -63,7 +64,7 @@ template<typename T>
 class Var2Function : public Function<T> {
 public:
     Var2Function() { }
-    T operator()(T x) { return x*x; }; // :FIXME:
+    T operator()(T x) { return x*x*x*x - static_cast<T>(1.5*atan(static_cast<double>(x))); }; // :FIXME:
 };
 
 template<typename T>

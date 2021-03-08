@@ -2,6 +2,8 @@
 
 #include "lab1ui.hpp"
 
+#include <QColor>
+
 /**
  * General implementation of {@link GraphicsSouce} for {@link Optimizer} interface
  * @code
@@ -29,7 +31,7 @@ public:
             m_done = true;
             draw_iteration(std::vector<IterationData<T>*>());
             auto [x, y] = m_optimizer.get_min();
-            emit add_item(create_point(x, y));
+            emit add_item(create_point(x, y, Qt::green));
         } else {
             draw_iteration(m_optimizer.get_data());
         }

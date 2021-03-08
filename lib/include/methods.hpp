@@ -42,7 +42,8 @@ public:
     }
     std::vector<IterationData<T>*> get_data() {
         return {new IterationPoint<T>(m_x1, m_fx1),
-            new IterationInterval<T>(m_a, m_b)};
+                new IterationPoint<T>(m_x2, m_fx2),
+                new IterationInterval<T>(m_a, m_b)};
     }
 
 private:
@@ -89,7 +90,8 @@ public:
         return std::make_pair(x, (*this->m_function)(x));
     }
     std::vector<IterationData<T>*> get_data() {
-        return {new IterationInterval<T>(a, b)}; // :TODO:
+        return {new IterationInterval<T>(a, b), new IterationPoint<T>(x1, f_x1),
+                new IterationPoint<T>(x2, f_x2)};
     }
 };
 
@@ -144,14 +146,15 @@ public:
         return std::make_pair(x, (*this->m_function)(x));
     }
     std::vector<IterationData<T>*> get_data() {
-        return {new IterationInterval<T>(a, b)}; // :TODO:
+        return {new IterationInterval<T>(a, b), new IterationPoint<T>(x1, f_x1),
+                new IterationPoint<T>(x2, f_x2)};
     }
 };
 
 template <typename T>
 class ParabolasMethod : public Optimizer<T> {
 private:
-    T a, b, sigma, x2, x_res, f_a, f_b, f_x2;
+    T a, b, sigma, x2, x_res, f_a, f_b, f_x2, u, f_u;
 public:
     ParabolasMethod(Function<T>* function, T a, T b, T eps = EPS)
         : Optimizer<T>(function), a(a), b(b), sigma(eps) {
@@ -162,11 +165,11 @@ public:
         f_x2 = (*this->m_function)(x2);
     }
     bool forward() {
-        T u =
+        u =
             x2 - ((x2 - a) * (x2 - a) * (f_x2 - f_b) -
                   (x2 - b) * (x2 - b) * (f_x2 - f_a)) /
             ((x2 - a) * (f_x2 - f_b) - (x2 - b) * (f_x2 - f_a)) / 2;
-        T f_u = (*this->m_function)(u);
+        f_u = (*this->m_function)(u);
         if (abs(u - x_res) < sigma) {
             return false;
         }
@@ -201,7 +204,8 @@ public:
         return std::make_pair(x_res, (*this->m_function)(x_res));
     }
     std::vector<IterationData<T>*> get_data() {
-        return {new IterationInterval<T>(a, b)}; // :TODO:
+        return {new IterationInterval<T>(a, b),
+                new IterationPoint<T>(u, f_u)};  // :FIXME:
     }
 };
 
@@ -277,6 +281,6 @@ public:
         return std::make_pair(x, (*this->m_function)(x));
     }
     std::vector<IterationData<T>*> get_data() {
-        return {new IterationInterval<T>(a, b)}; // :TODO:
+        return {new IterationInterval<T>(a, b), new IterationPoint<T>(u, fu)}; // :FIXME:
     }
 };

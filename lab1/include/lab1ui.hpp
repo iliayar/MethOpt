@@ -21,18 +21,19 @@
 
 Q_DECLARE_METATYPE(Method)
 
-#define SCALE 4
-#define PLOT_STEP 0.1
-#define ITERATION_INTERVAL 500
+#define SCALE 10
+#define PLOT_STEP 0.05
+#define ITERATION_INTERVAL 200
 
 template <typename T>
-void set_pen(T* item, QColor color, int width = 1, int alpha = 255) {
+void set_pen(T* item, QColor color, int width = 3, int alpha = 255) {
     QPen pen{};
     color.setAlpha(alpha);
     pen.setStyle(Qt::SolidLine);
     pen.setWidth(width);
     pen.setColor(color);
     pen.setCapStyle(Qt::RoundCap);
+    pen.setCosmetic(true);
     item->setPen(pen);
 }
 
@@ -48,7 +49,7 @@ void set_brush(T* item, QColor color, int alpha = 255) {
 QRectF scale_rect(QRectF, double);
 
 /**
- * The abstract class provides connecting the minimizer and visualization widget
+ * The abstract class provides connection of minimizer and visualization widget
  */ 
 class GraphicsSource : public QObject {
     Q_OBJECT
@@ -103,7 +104,7 @@ protected:
     }
 
     QGraphicsItem* create_function(Function<double>*);
-    QGraphicsItem* create_point(double, double);
+    QGraphicsItem* create_point(double, double, QColor = Qt::red);
     QGraphicsItem* create_interval(double, double);
 
 private:

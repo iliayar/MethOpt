@@ -83,9 +83,9 @@ Lab1Window::Lab1Window(QWidget* parent)
     double w = graphics_view->width();
     double h = graphics_view->height();
     QRectF scaled_rect = scale_rect(QRectF(x, y, w, h), 1 / (double)SCALE);
+    graphics_view->scale(1 * SCALE, -1 * SCALE);
     scene->setSceneRect(scaled_rect);
     graphics_view->setScene(scene);
-    graphics_view->scale(1 * SCALE, -1 * SCALE);
     graphics_view->setRenderHint(QPainter::Antialiasing);
 
     left_spin->setRange(scaled_rect.left(), scaled_rect.right());
@@ -187,10 +187,10 @@ void Lab1Window::set_source(GraphicsSource* source) {
 
 Lab1Window::~Lab1Window() {}
 
-QGraphicsItem* GraphicsSource::create_point(double x, double y) {
+QGraphicsItem* GraphicsSource::create_point(double x, double y, QColor color) {
     QGraphicsEllipseItem* point = new QGraphicsEllipseItem(x, y, 0.5, 0.5);
-    set_pen(point, Qt::red);
-    set_brush(point, Qt::red);
+    set_pen(point, color);
+    set_brush(point, color);
     return point;
 }
 
