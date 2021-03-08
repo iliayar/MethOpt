@@ -1,6 +1,7 @@
 /**
  * @file function.hpp
  * Here we implements a simple intefrace to work with different functions
+ * @c T in all classes must implement cast to/from double, and all algebraic operaions
  */
 #pragma once
 
@@ -17,7 +18,7 @@ class StdFunction;
  * double x = 0.5;
  * dobule y = (*f)(x); // y = 0.25
  * @endcode
- * @tparam T function's argument and return value type
+ * @tparam T function's argument and return value type.
  */
 template <typename T>
 class Function {

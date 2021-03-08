@@ -2,6 +2,7 @@
  * @file optimizer.hpp
  * Here we implement the interface if minizing methods.
  * Also there is a classes for representing information on each iteration.
+ * @c T must respect requirements from {@link function.hpp}
  */
 #pragma once
 
