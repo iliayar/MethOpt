@@ -13,6 +13,7 @@
 #include <QPushButton>
 #include <QComboBox>
 #include <QDoubleSpinBox>
+#include <QRandomGenerator>
 #include <iostream>
 
 #include "function.hpp"
@@ -21,7 +22,7 @@
 
 Q_DECLARE_METATYPE(Method)
 
-#define SCALE 10
+#define SCALE 30
 #define PLOT_STEP 0.05
 #define ITERATION_INTERVAL 200
 
@@ -81,6 +82,16 @@ protected:
     template<typename T>
     void draw_iteration(std::vector<IterationData<T>*> data) {
         for(QGraphicsItem* item : m_prev_items) {
+            QGraphicsEllipseItem* point = dynamic_cast<QGraphicsEllipseItem*>(item);
+            if (point != nullptr) {
+                unsigned char r = QRandomGenerator::global()->generate();
+                unsigned char g = QRandomGenerator::global()->generate();
+                unsigned char b = QRandomGenerator::global()->generate();
+                QColor color(r, g, b);
+                set_pen(point, color);
+                set_brush(point, color);
+                continue;
+            }
             emit remove_item(item);
             delete item;
         }
@@ -103,7 +114,7 @@ protected:
         }
     }
 
-    QGraphicsItem* create_function(Function<double>*);
+    QGraphicsItem* create_function(Function<double>*, QColor = Qt::blue);
     QGraphicsItem* create_point(double, double, QColor = Qt::red);
     QGraphicsItem* create_interval(double, double);
 
@@ -116,7 +127,7 @@ private:
 
     template <typename T>
     QGraphicsItem* create_iter_function(IterationFunction<T>* function) {
-        return create_function(function->get_function()->to_double());
+        return create_function(function->get_function()->to_double(), Qt::gray);
     }
 
     template <typename T>

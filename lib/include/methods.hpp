@@ -204,16 +204,18 @@ public:
         return std::make_pair(x_res, (*this->m_function)(x_res));
     }
     std::vector<IterationData<T>*> get_data() {
-        return {new IterationInterval<T>(a, b),
-                new IterationPoint<T>(u, f_u)};  // :FIXME:
+        IterationFunction<T>* parabola = new IterationFunction<T>(
+            new StdFunction<T>([&](T x) { return f_a + f_x2*(x - x2) + f_b*(x - x2)*(x - b); }));
+        return {new IterationInterval<T>(a, b), new IterationPoint<T>(u, f_u),
+                parabola};
     }
 };
 
 template <typename T>
 class BrentMethod : public Optimizer<T> {
 private:
-    const int ITER_MAX = 100;
-    const T golden_sec_const = static_cast<double>(0.3819660);
+    const int ITER_MAX = 20;
+    const T golden_sec_const = static_cast<T>(0.3819660);
     const T eps = std::numeric_limits<T>::epsilon() * 1.0e-3;
     int i = 0;
     T a, b, sigma;
@@ -229,6 +231,7 @@ public:
     }
     bool forward() {
         T xm = 0.5 * (a + b);
+        T x_prev = x;
         tol2 = 2.0 * (tol1 = tol * abs(x) + eps);
         if (abs(x - xm) <= (tol2 - 0.5 * (b - a))) {
             return x;

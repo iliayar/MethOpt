@@ -1,7 +1,7 @@
 /**
  * @file function.hpp
  * Here we implements a simple intefrace to work with different functions
- * @c T in all classes must implement cast to/from double, and all algebraic operaions
+ * @c T type passed in class must implement cast to/from double, and all algebraic operaions
  */
 #pragma once
 

@@ -188,13 +188,13 @@ void Lab1Window::set_source(GraphicsSource* source) {
 Lab1Window::~Lab1Window() {}
 
 QGraphicsItem* GraphicsSource::create_point(double x, double y, QColor color) {
-    QGraphicsEllipseItem* point = new QGraphicsEllipseItem(x, y, 0.5, 0.5);
+    QGraphicsEllipseItem* point = new QGraphicsEllipseItem(x, y, 6.0 / SCALE, 6.0 / SCALE);
     set_pen(point, color);
     set_brush(point, color);
     return point;
 }
 
-QGraphicsItem* GraphicsSource::create_function(Function<double>* function) {
+QGraphicsItem* GraphicsSource::create_function(Function<double>* function, QColor color) {
     QGraphicsItemGroup* group = new QGraphicsItemGroup();
 
     double prev_x = m_scene_rect.left();
@@ -205,7 +205,7 @@ QGraphicsItem* GraphicsSource::create_function(Function<double>* function) {
         double new_y = (*function)(new_x);
         QGraphicsLineItem* line =
             new QGraphicsLineItem(prev_x, prev_y, new_x, new_y);
-        set_pen(line, Qt::blue);
+        set_pen(line, color);
         group->addToGroup(line);
         prev_x = new_x;
         prev_y = new_y;
