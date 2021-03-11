@@ -217,7 +217,7 @@ public:
 template <typename T>
 class BrentMethod : public Optimizer<T> {
 private:
-    const int ITER_MAX = 20;
+    const int ITER_MAX = 100;
     const T golden_sec_const = static_cast<T>(0.3819660);
     const T eps = std::numeric_limits<T>::epsilon() * 1.0e-3;
     int i = 0;
@@ -237,7 +237,7 @@ public:
         T x_prev = x;
         tol2 = 2.0 * (tol1 = tol * abs(x) + eps);
         if (abs(x - xm) <= (tol2 - 0.5 * (b - a))) {
-            return x;
+            return false;
         }
         if (abs(e) > tol1) {
             T r = (x - w) * (fx - fv);
