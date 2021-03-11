@@ -79,6 +79,8 @@ int fired_main(
               << optimzier->get_min().first
               << ", \"y\": " << optimzier->get_min().second << " }"
               << std::endl;
+    std::cout << "{\"type\": \"call_count\", \"count\": "
+              << optimzier->get_call_count() << " }" << std::endl;
     return 0;
 }
 

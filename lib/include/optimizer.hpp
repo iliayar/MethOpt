@@ -112,7 +112,7 @@ private:
 template<typename T>
 class Optimizer {
 public:
-    Optimizer(Function<T>* function) : m_function(function) {}
+    Optimizer(Function<T>* function) : m_function(new CountingFunction<T>(function)) {}
 
     /**
      * Makes a single iteration step.
@@ -132,7 +132,7 @@ public:
      */
     virtual std::pair<T, T> get_min() = 0;
 
-    Function<T>* get_function() { return m_function; }
+    int get_call_count() { return m_function->get_count(); }
 protected:
-    Function<T>* m_function;
+    CountingFunction<T>* m_function;
 };

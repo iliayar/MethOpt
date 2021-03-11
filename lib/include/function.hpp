@@ -67,6 +67,29 @@ public:
     T operator()(T x) { return x*x*x*x - static_cast<T>(1.5*atan(static_cast<double>(x))); }; // :FIXME:
 };
 
+/**
+ * The wrapper for function, counts the number of calls to provided function
+ * @tparam T the same as in {@link Function} 
+ */
+template<typename T>
+class CountingFunction : public Function<T> {
+public:
+    CountingFunction(Function<T>* function)
+        : m_function(function), m_counter(0) {}
+    T operator()(T x) {
+        m_counter++;
+        return (*m_function)(x);
+    }
+
+    /**
+     * @return the number of times this function was called
+     */
+    int get_count() { return m_counter; }
+private:
+    Function<T>* m_function;
+    int m_counter;
+};
+
 template<typename T>
 Function<double>* Function<T>::to_double() {
     return new StdFunction<double>([this](double x) {
