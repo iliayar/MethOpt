@@ -154,47 +154,50 @@ public:
 template <typename T>
 class ParabolasMethod : public Optimizer<T> {
 private:
-    T a, b, sigma, x2, x_res, f_a, f_b, f_x2, u, f_u;
+    T x_1, x_3, sigma, x_2, x_res, f_x1, f_x3, f_x2, u, f_u, a, b, c;
+
 public:
-    ParabolasMethod(Function<T>* function, T a, T b, T eps = EPS)
-        : Optimizer<T>(function), a(a), b(b), sigma(eps) {
-        x2 = (a + b) / 2;
-        x_res = a;
-        f_a  = (*this->m_function)(a);
-        f_b  = (*this->m_function)(b);
-        f_x2 = (*this->m_function)(x2);
+    ParabolasMethod(Function<T>* function, T x_1, T x_3, T eps = EPS)
+        : Optimizer<T>(function), x_1(x_1), x_3(x_3), sigma(eps) {
+        x_2 = (x_1 + x_3) / 2;
+        x_res = x_1;
+        f_x1 = (*this->m_function)(x_1);
+        f_x3 = (*this->m_function)(x_3);
+        f_x2 = (*this->m_function)(x_2);
     }
     bool forward() {
-        u =
-            x2 - ((x2 - a) * (x2 - a) * (f_x2 - f_b) -
-                  (x2 - b) * (x2 - b) * (f_x2 - f_a)) /
-            ((x2 - a) * (f_x2 - f_b) - (x2 - b) * (f_x2 - f_a)) / 2;
+        a = (f_x3 -
+             (x_3 * (f_x2 - f_x1) + x_2 * f_x1 - x_1 * f_x2) / (x_2 - x_1)) /
+            (x_3 * (x_3 - x_1 - x_2) + x_1 * x_2);
+        b = (f_x2 - f_x1) / (x_2 - x_1) - a * (x_1 + x_2);
+        c = (x_2 * f_x1 - x_1 * f_x2) / (x_2 - x_1) + a * x_1 * x_2;
+        u = (-1 * b) / (2 * a);
         f_u = (*this->m_function)(u);
         if (abs(u - x_res) < sigma) {
             return false;
         }
-        if ((u > a) && (u < x2)) {
+        if ((u > x_1) && (u < x_2)) {
             if (f_u <= f_x2) {
-                b = x2;
-                f_b = f_x2;
-                x2 = u;
+                x_3 = x_2;
+                f_x3 = f_x2;
+                x_2 = u;
                 f_x2 = f_u;
                 x_res = u;
             } else {
-                a = u;
-                f_a = f_u;
+                x_1 = u;
+                f_x1 = f_u;
                 x_res = u;
             }
         } else {
             if (f_x2 >= f_u) {
-                a = x2;
-                f_a = f_x2;
-                x2 = u;
+                x_1 = x_2;
+                f_x1 = f_x2;
+                x_2 = u;
                 f_x2 = f_u;
                 x_res = u;
             } else {
-                b = u;
-                f_b = f_u;
+                x_3 = u;
+                f_x3 = f_u;
                 x_res = u;
             }
         }
@@ -205,9 +208,9 @@ public:
     }
     std::vector<IterationData<T>*> get_data() {
         IterationFunction<T>* parabola = new IterationFunction<T>(
-            new StdFunction<T>([&](T x) { return f_a + f_x2*(x - x2) + f_b*(x - x2)*(x - b); }));
-        return {new IterationInterval<T>(a, b), new IterationPoint<T>(u, f_u),
-                parabola};
+            new StdFunction<T>([&](T x) { return a * x * x + b * x + c; }));
+        return {new IterationInterval<T>(x_1, x_3),
+                new IterationPoint<T>(u, f_u), parabola};
     }
 };
 
