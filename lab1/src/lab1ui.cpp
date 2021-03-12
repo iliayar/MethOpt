@@ -119,37 +119,37 @@ Lab1Window::Lab1Window(QWidget* parent)
 void Lab1Window::choose_method() {
     double left = m_left_spin->value();
     double right = m_right_spin->value();
+    Function<double>* function = new Var2Function<double>();
     m_scene->clear();
     switch (qvariant_cast<Method>(m_methods_combo->currentData())) {
         case Method::Dichotomy: {
             set_source(
                 new OptimizationGraphicsSource<DichotomyMethod<double>, double>(
-                    new Var2Function<double>, left, right));
+                    function, left, right));
             break;
         }
         case Method::Fibonacci: {
             set_source(
                 new OptimizationGraphicsSource<FibonacciMethod<double>, double>(
-                    new Var2Function<double>, left, right));
+                    function, left, right));
             break;
         }
         case Method::Brent: {
             set_source(
                 new OptimizationGraphicsSource<BrentMethod<double>, double>(
-                    new Var2Function<double>, left, right));
+                    function, left, right));
             break;
         }
         case Method::Parabolas: {
             set_source(
                 new OptimizationGraphicsSource<ParabolasMethod<double>, double>(
-                    new Var2Function<double>, left, right));
+                    function, left, right));
             break;
         }
         case Method::GoldenSection: {
             set_source(
                 new OptimizationGraphicsSource<GoldenSectionMethod<double>,
-                                               double>(new Var2Function<double>,
-                                                       left, right));
+                                               double>(function, left, right));
             break;
         }
     }

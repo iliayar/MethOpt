@@ -34,7 +34,7 @@ public:
 
         update_bounds();
 
-        return (m_b - m_a) / 2 > sigma;
+        return fabs(m_b - m_a) / 2 > sigma;
     }
     std::pair<T, T> get_min() {
         double x = (m_a + m_b) / 2;
@@ -83,7 +83,7 @@ public:
             f_x1 = (*this->m_function)(x1);
         }
 
-        return abs(b - a) > sigma;
+        return fabs(b - a) > sigma;
     }
     std::pair<T, T> get_min() {
         T x = (a + b) / 2;
@@ -173,7 +173,7 @@ public:
         c = (x_2 * f_x1 - x_1 * f_x2) / (x_2 - x_1) + a * x_1 * x_2;
         u = (-1 * b) / (2 * a);
         f_u = (*this->m_function)(u);
-        if (abs(u - x_res) < sigma) {
+        if (fabs(u - x_res) < sigma) {
             return false;
         }
         if ((u > x_1) && (u < x_2)) {
@@ -219,36 +219,36 @@ class BrentMethod : public Optimizer<T> {
 private:
     const int ITER_MAX = 100;
     const T golden_sec_const = static_cast<T>(0.3819660);
-    const T eps = std::numeric_limits<T>::epsilon() * 1.0e-3;
+    const T eps;
     int i = 0;
     T a, b, sigma;
     T d = 0.0, fu, fv, fw, fx;
     T tol1, tol2, u, v, w, x;
-    T tol = 3e-8;
+    T tol;
     T e = 0.0;
 public:
     BrentMethod(Function<T>* function, T a, T b, T eps = EPS)
-        : Optimizer<T>(function), a(a), b(b), sigma(eps) {
+        : Optimizer<T>(function), a(a), b(b), sigma(eps), eps(eps), tol(eps) {
         x = w = v = b;
         fw = fv = fx = (*this->m_function)(x);
     }
     bool forward() {
         T xm = 0.5 * (a + b);
         T x_prev = x;
-        tol2 = 2.0 * (tol1 = tol * abs(x) + eps);
-        if (abs(x - xm) <= (tol2 - 0.5 * (b - a))) {
+        tol2 = 2.0 * (tol1 = tol * fabs(x) + eps);
+        if (fabs(x - xm) <= (tol2 - 0.5 * (b - a))) {
             return false;
         }
-        if (abs(e) > tol1) {
+        if (fabs(e) > tol1) {
             T r = (x - w) * (fx - fv);
             T q = (x - v) * (fx - fw);
             T p = (x - v) * q - (x - w) * r;
             q = 2.0 * (q - r);
             if (q > 0.0) p = -p;
-            q = abs(q);
+            q = fabs(q);
             T e_temp = e;
             e = d;
-            if (abs(p) >= abs(0.5 * q * e_temp) || p <= q * (a - x) || p >= q * (b - x)) {
+            if (fabs(p) >= fabs(0.5 * q * e_temp) || p <= q * (a - x) || p >= q * (b - x)) {
                 d = golden_sec_const * (e = (x >= xm ? a - x : b - x));
             } else {
                 d = p / q;
@@ -259,7 +259,7 @@ public:
         } else {
             d = golden_sec_const * (e = (x >= xm ? a - x : b - x));
         }
-        u = (abs(d) >= tol1 ? x + d : x + tol1);
+        u = (fabs(d) >= tol1 ? x + d : x + tol1);
         fu = (*this->m_function)(u);
         if (fu <= fx) {
             v = w;

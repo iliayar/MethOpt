@@ -42,30 +42,31 @@ int fired_main(
                    "Optimization method. Avaliable: dichotomy, parabolas, "
                    "brent, goldensections, fibonacci"},
                   "dichotomy"),
-    double left = fire::arg({"-l", "--left", "Left bound of range"}, -10.0),
-    double right = fire::arg({"-r", "--right", "Right bound of range"}, 10.0),
-    fire::optional<double> eps = fire::arg({"-e", "--epsilon",
-                                            "Precision to find minimum til"})) {
-    Optimizer<double>* optimzier;
+    double left = fire::arg({"-l", "--left", "Left bound of range"}, -1.0),
+    double right = fire::arg({"-r", "--right", "Right bound of range"}, 1.0),
+    double eps = fire::arg({"-e", "--epsilon", "Precision to find minimum til"},
+                           1e-5)) {
+    Optimizer<double>* optimzier = nullptr;
+    Function<double>* function = new Var2Function<double>();
     if (method == "dichotomy") {
         optimzier = new DichotomyMethod<double>(
-            new Var2Function<double>(), left, right, eps.value_or(1e-5));
+            function, left, right, eps);
     }
     if (method == "parabolas") {
         optimzier = new ParabolasMethod<double>(
-            new Var2Function<double>(), left, right, eps.value_or(1e-5));
+            function, left, right, eps);
     }
     if (method == "brent") {
-        optimzier = new BrentMethod<double>(new Var2Function<double>(), left,
-                                            right, eps.value_or(1e-5));
+        optimzier = new BrentMethod<double>(function, left,
+                                            right, eps);
     }
     if (method == "goldensections") {
         optimzier = new GoldenSectionMethod<double>(
-            new Var2Function<double>(), left, right, eps.value_or(1e-5));
+            function, left, right, eps);
     }
     if (method == "fibonacci") {
         optimzier = new FibonacciMethod<double>(
-            new Var2Function<double>(), left, right, eps.value_or(1e-5));
+            function, left, right, eps);
     }
 
     if (optimzier == nullptr) {
@@ -77,10 +78,9 @@ int fired_main(
     } while (optimzier->forward());
     std::cout << "{ \"type\": \"minimum\", \"x\": "
               << optimzier->get_min().first
-              << ", \"y\": " << optimzier->get_min().second << " }"
+              << ", \"y\": " << optimzier->get_min().second
+              << ", \"call_count\": " << optimzier->get_call_count() << " }"
               << std::endl;
-    std::cout << "{\"type\": \"call_count\", \"count\": "
-              << optimzier->get_call_count() << " }" << std::endl;
     return 0;
 }
 

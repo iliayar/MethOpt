@@ -6,6 +6,7 @@
 
 /**
  * General implementation of {@link GraphicsSouce} for {@link Optimizer} interface
+ * Provided method to iterate the optimizer. Draws each iterataion data.
  * @code
  * Lab1Window* w = ...
  * w.set_source(new OptimizationGraphicsSource<DichotomyMethod<double>, double>(new Parabola<double>(), -40, -5));
