@@ -8,6 +8,7 @@
 #include <memory>
 #include <functional>
 #include <cmath>
+#include <vector>
 
 template<typename T>
 class StdFunction;
@@ -88,6 +89,28 @@ public:
 private:
     Function<T>* m_function;
     int m_counter;
+};
+
+/**
+ * Polynomial function. Represents function y = p_0 + p_1*x + p_2*x^2 + ...
+ * @tparam T the same as in {@link Function}
+ */
+template <typename T>
+class PolynomFunction : public Function<T> {
+public:
+    PolynomFunction(std::vector<T> coefs) : m_coefs(coefs) {}
+
+    T operator()(T x) {
+        T res = 0;
+        for (int i = m_coefs.size() - 1; i >= 0; --i) {
+            res *= x;
+            res += m_coefs[i];
+        }
+        return res;
+    }
+
+private:
+    std::vector<T> m_coefs;
 };
 
 template<typename T>

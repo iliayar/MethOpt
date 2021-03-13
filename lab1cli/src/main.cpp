@@ -37,6 +37,10 @@ void print_data_json(std::vector<IterationData<double>*> data) {
 }
 
 int fired_main(
+    std::vector<double> poly =
+        fire::arg({fire::variadic(),
+                   "Run with polynom function. p_0 + p_1*x + p_2*x^2 + ... .If "
+                   "no values provided runs with default function"}),
     std::string method =
         fire::arg({"-m", "--method",
                    "Optimization method. Avaliable: dichotomy, parabolas, "
@@ -47,7 +51,12 @@ int fired_main(
     double eps = fire::arg({"-e", "--epsilon", "Precision to find minimum til"},
                            1e-5)) {
     Optimizer<double>* optimzier = nullptr;
-    Function<double>* function = new Var2Function<double>();
+    Function<double>* function;
+    if(poly.size() == 0) {
+        function  = new Var2Function<double>();
+    } else {
+        function = new PolynomFunction(poly);
+    }
     if (method == "dichotomy") {
         optimzier = new DichotomyMethod<double>(
             function, left, right, eps);

@@ -164,8 +164,12 @@ public:
         f_x1 = (*this->m_function)(x_1);
         f_x3 = (*this->m_function)(x_3);
         f_x2 = (*this->m_function)(x_2);
+        a = b = c = 0;
     }
     bool forward() {
+        if(check_equals(x_2, x_1) || check_equals(x_3, x_1) || check_equals(x_3, x_2)) {
+            return false;
+        }
         a = (f_x3 -
              (x_3 * (f_x2 - f_x1) + x_2 * f_x1 - x_1 * f_x2) / (x_2 - x_1)) /
             (x_3 * (x_3 - x_1 - x_2) + x_1 * x_2);
@@ -212,6 +216,10 @@ public:
         return {new IterationInterval<T>(x_1, x_3),
                 new IterationPoint<T>(u, f_u), parabola};
     }
+private:
+    bool check_equals(T a, T b) {
+        return static_cast<T>(fabs(a - b)) < std::numeric_limits<T>::epsilon();
+    }
 };
 
 template <typename T>
@@ -228,7 +236,7 @@ private:
     T e = 0.0;
 public:
     BrentMethod(Function<T>* function, T a, T b, T eps = EPS)
-        : Optimizer<T>(function), a(a), b(b), sigma(eps), eps(eps), tol(eps) {
+        : Optimizer<T>(function), a(a), b(b), sigma(eps), eps(eps*1e-3), tol(eps) {
         x = w = v = b;
         fw = fv = fx = (*this->m_function)(x);
     }
