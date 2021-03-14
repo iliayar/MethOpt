@@ -122,6 +122,7 @@ public:
 
     /**
      * Fetch data of currently passed iteration. So must be called after {@link Optimizer::forward}
+     * Size of data always the same for each iteration.
      * @return @c std::vector of {@link IterationData} pointer.
      */
     virtual std::vector<IterationData<T>*> get_data() = 0;

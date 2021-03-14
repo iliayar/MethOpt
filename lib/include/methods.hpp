@@ -99,15 +99,15 @@ template <typename T>
 class FibonacciMethod : public Optimizer<T> {
 private:
     T a, b, sigma, x1, x2, f_x1, f_x2;
-    int k = 0, n;
+    long long int k = 0, n;
     std::vector<T> fib;
 public:
     FibonacciMethod(Function<T>* function, T a, T b, T eps = EPS)
         : Optimizer<T>(function), a(a), b(b), sigma(eps) {
-        fib.resize(100, 0);
+        fib.resize(1000, 0);
         fib[0] = 1;
         fib[1] = 1;
-        int sz = (int)((b - a) / sigma) + 1;
+        long long int sz = (int)((b - a) / sigma) + 1;
         n = 2;
         for (;; n++) {
             fib[n] = fib[n - 1] + fib[n - 2];
@@ -170,9 +170,15 @@ public:
         if(check_equals(x_2, x_1) || check_equals(x_3, x_1) || check_equals(x_3, x_2)) {
             return false;
         }
+        // if(check_equals(x_3 * (x_3 - x_1 - x_2) + x_1 * x_2, 0)) {
+        //     return false;
+        // }
         a = (f_x3 -
              (x_3 * (f_x2 - f_x1) + x_2 * f_x1 - x_1 * f_x2) / (x_2 - x_1)) /
             (x_3 * (x_3 - x_1 - x_2) + x_1 * x_2);
+        // if(check_equals(a, 0)) {
+        //     return false;
+        // }
         b = (f_x2 - f_x1) / (x_2 - x_1) - a * (x_1 + x_2);
         c = (x_2 * f_x1 - x_1 * f_x2) / (x_2 - x_1) + a * x_1 * x_2;
         u = (-1 * b) / (2 * a);
@@ -236,7 +242,7 @@ private:
     T e = 0.0;
 public:
     BrentMethod(Function<T>* function, T a, T b, T eps = EPS)
-        : Optimizer<T>(function), a(a), b(b), sigma(eps), eps(eps*1e-3), tol(eps) {
+        : Optimizer<T>(function), a(a), b(b), sigma(eps), eps(std::numeric_limits<T>::epsilon()), tol(eps) {
         x = w = v = b;
         fw = fv = fx = (*this->m_function)(x);
     }
@@ -244,7 +250,7 @@ public:
         T xm = 0.5 * (a + b);
         T x_prev = x;
         tol2 = 2.0 * (tol1 = tol * fabs(x) + eps);
-        if (fabs(x - xm) <= (tol2 - 0.5 * (b - a))) {
+        if (fabs(x - xm) <= (tol2 - 0.5 * fabs(b - a))) {
             return false;
         }
         if (fabs(e) > tol1) {
