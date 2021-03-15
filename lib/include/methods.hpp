@@ -14,6 +14,11 @@ enum class Method {
 };
 
 template <typename T>
+bool check_equals(T a, T b) {
+    return static_cast<T>(fabs(a - b)) < std::numeric_limits<T>::epsilon();
+}
+
+template <typename T>
 class DichotomyMethod : public Optimizer<T> {
 private:
     T m_a, m_b, sigma, m_x1, m_x2, m_delta, m_fx1, m_fx2;
@@ -222,10 +227,6 @@ public:
         return {new IterationInterval<T>(x_1, x_3),
                 new IterationPoint<T>(u, f_u), parabola};
     }
-private:
-    bool check_equals(T a, T b) {
-        return static_cast<T>(fabs(a - b)) < std::numeric_limits<T>::epsilon();
-    }
 };
 
 template <typename T>
@@ -273,9 +274,11 @@ public:
         } else {
             d = golden_sec_const * (e = (x >= xm ? a - x : b - x));
         }
-        u = (fabs(d) >= tol1 ? x + d : x + tol1);
+        u = (fabs(d) >= tol1 ? x + d : x + tol1*(d > 0 ? 1 : -1));
         fu = (*this->m_function)(u);
         if (fu <= fx) {
+            if(u < x) b = x;
+            else a = x;
             v = w;
             w = x;
             x = u;
@@ -285,12 +288,12 @@ public:
         } else {
             if (u < x) a = u;
             else b = u;
-            if (fu <= fw || w == x) {
+            if (fu <= fw || check_equals(w, x)) {
                 v = w;
                 w = u;
                 fv = fw;
                 fw = fu;
-            } else if (fu <= fv || v == x || v == w) {
+            } else if (fu <= fv || check_equals(v, x)|| check_equals(v, w)) {
                 v = u;
                 fv = fu;
             }

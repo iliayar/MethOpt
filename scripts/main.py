@@ -8,10 +8,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 methods = [
-    Method.DICHOTOMY,
-    Method.GOLDENSECTIONS,
-    Method.FIBONACCI,
-    Method.PARABOLAS,
+    # Method.DICHOTOMY,
+    # Method.GOLDENSECTIONS,
+    # Method.FIBONACCI,
+    # Method.PARABOLAS,
     Method.BRENT,
 ]
 
@@ -35,6 +35,8 @@ def gen_table(method):
 def count_calls(method = Method.DICHOTOMY, epsilon = 1e-5):
    for data in read_data(epsilon = epsilon, method = method):
        if(data['type'] == 'minimum'):
+           # if (int(data['call_count']) > 100):
+           #     print(epsilon)
            return int(data['call_count'])
 def gen_count_graph(method):
     epsilons = np.linspace(-1, -20, 500)
@@ -44,6 +46,7 @@ def gen_count_graph(method):
     plt.xlabel('$\\log \\varepsilon$')
     plt.ylabel("Call count")
     plt.savefig(PROJECT_ROOT + 'scripts/images/count_' + method + '.png')
+    plt.show()
 
 def gen_gprahs():
     for method in methods:
@@ -70,16 +73,15 @@ def test_polynom(polynom, x_range, plt = plt):
     plt.legend()
 
 if __name__ == "__main__":
-    # gen_gprahs()
+    gen_gprahs()
     # gen_tables()
-    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
-    test_polynom([0, 0, 1], (-1, 1), plt = ax1)
-    test_polynom([0, -0.4, 2, -0.2], (-5, 12), plt = ax2)
-    test_polynom([-0.1, -0.9, -1.4, 0.3, 0.3], (-3, 3), plt = ax3)
-    test_polynom([-0.1, 0.1, -0.5, 0.1, -0.8, 0.1], (-5, 5), plt = ax4)
-    handles, labels = ax4.get_legend_handles_labels()
-    # plt.gcf().legend(handles, labels, loc = 'upper center')
-    plt.gcf().set_size_inches(10, 10)
-    plt.savefig(PROJECT_ROOT + 'scripts/images/polynom.png', dpi=100)
-    plt.show()
+    # fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+    # test_polynom([0, 0, 1], (-1, 1), plt = ax1)
+    # test_polynom([0, -0.4, 2, -0.2], (-5, 12), plt = ax2)
+    # test_polynom([-0.1, -0.9, -1.4, 0.3, 0.3], (-3, 3), plt = ax3)
+    # test_polynom([-0.1, 0.1, -0.5, 0.1, -0.8, 0.1], (-5, 5), plt = ax4)
+    # handles, labels = ax4.get_legend_handles_labels()
+    # plt.gcf().set_size_inches(10, 10)
+    # plt.savefig(PROJECT_ROOT + 'scripts/images/polynom.png', dpi=100)
+    # plt.show()
 
