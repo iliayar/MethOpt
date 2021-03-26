@@ -8,10 +8,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 methods = [
-    # Method.DICHOTOMY,
-    # Method.GOLDENSECTIONS,
-    # Method.FIBONACCI,
-    # Method.PARABOLAS,
+    Method.DICHOTOMY,
+    Method.GOLDENSECTIONS,
+    Method.FIBONACCI,
+    Method.PARABOLAS,
     Method.BRENT,
 ]
 
@@ -45,14 +45,13 @@ def gen_count_graph(method):
     plt.legend()
     plt.xlabel('$\\log \\varepsilon$')
     plt.ylabel("Call count")
-    plt.savefig(PROJECT_ROOT + 'scripts/images/count_' + method + '.png')
-    plt.show()
+    # plt.show()
 
 def gen_gprahs():
     for method in methods:
         print("Generating graph for " + method + " method")
         gen_count_graph(method)
-        plt.clf()
+        # plt.clf()
 def gen_tables():
     for method in methods:
         print("Generating table for " + method + " method")
@@ -74,6 +73,7 @@ def test_polynom(polynom, x_range, plt = plt):
 
 if __name__ == "__main__":
     gen_gprahs()
+    plt.savefig(PROJECT_ROOT + 'scripts/images/count.png')
     # gen_tables()
     # fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
     # test_polynom([0, 0, 1], (-1, 1), plt = ax1)

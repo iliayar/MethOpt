@@ -18,8 +18,11 @@
 #include "optimizerUI.hpp"
 
 QRectF scale_rect(QRectF rect, double scale) {
-    return QRectF(rect.left() * scale, rect.top() * scale, rect.width() * scale,
-                  rect.height() * scale);
+    double width = rect.width();
+    double height = rect.height();
+    double left = rect.left() + width/2 - (width/2)*scale;
+    double top = rect.top() + height/2 - (height/2)*scale;
+    return QRectF(left, top, width*scale, height*scale);
 }
 
 Lab1Window::Lab1Window(QWidget* parent)
@@ -82,10 +85,10 @@ Lab1Window::Lab1Window(QWidget* parent)
     double y = -graphics_view->height() / 2;
     double w = graphics_view->width();
     double h = graphics_view->height();
-    QRectF scaled_rect = scale_rect(QRectF(x, y, w, h), 1 / (double)SCALE);
+    QRectF scaled_rect = scale_rect(QRectF(x, y, w, h), 1);
+    graphics_view->setScene(scene);
     graphics_view->scale(1 * SCALE, -1 * SCALE);
     scene->setSceneRect(scaled_rect);
-    graphics_view->setScene(scene);
     graphics_view->setRenderHint(QPainter::Antialiasing);
 
     left_spin->setRange(scaled_rect.left(), scaled_rect.right());
@@ -182,6 +185,12 @@ void Lab1Window::set_source(GraphicsSource* source) {
             &GraphicsSource::start_auto_iteration);
     connect(m_stop_button, &QPushButton::clicked, m_source,
             &GraphicsSource::stop_auto_iteration);
+    double left = m_left_spin->value();
+    double right = m_right_spin->value();
+    double len = right - left;
+    left -= len;
+    right += len;
+    m_source->set_bounds(left, right);
     m_source->init(m_scene);
 }
 
@@ -197,9 +206,10 @@ QGraphicsItem* GraphicsSource::create_point(double x, double y, QColor color) {
 QGraphicsItem* GraphicsSource::create_function(Function<double>* function, QColor color) {
     QGraphicsItemGroup* group = new QGraphicsItemGroup();
 
-    double prev_x = m_scene_rect.left();
+    // double prev_x = m_scene_rect.left();
+    double prev_x = m_left;
     double prev_y = (*function)(prev_x);
-    for (double x = m_scene_rect.left() + PLOT_STEP; x < m_scene_rect.right();
+    for (double x = m_left + PLOT_STEP; x < m_right;
          x += PLOT_STEP) {
         double new_x = x;
         double new_y = (*function)(new_x);
@@ -220,8 +230,8 @@ QGraphicsItem* GraphicsSource::create_interval(double left, double right) {
         left, m_scene_rect.bottom(), left, m_scene_rect.top());
     QGraphicsLineItem* right_line = new QGraphicsLineItem(
         right, m_scene_rect.bottom(), right, m_scene_rect.top());
-    set_pen(left_line, Qt::gray, 1, 100);
-    set_pen(right_line, Qt::gray, 1, 100);
+    set_pen(left_line, Qt::gray, 4, 100);
+    set_pen(right_line, Qt::gray, 4, 100);
 
     group->addToGroup(left_line);
     group->addToGroup(right_line);

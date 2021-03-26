@@ -22,8 +22,8 @@
 
 Q_DECLARE_METATYPE(Method)
 
-#define SCALE 30
-#define PLOT_STEP 0.05
+#define SCALE 200
+#define PLOT_STEP 0.02
 #define ITERATION_INTERVAL 200
 
 template <typename T>
@@ -51,6 +51,7 @@ QRectF scale_rect(QRectF, double);
 
 /**
  * The abstract class provides connection of minimizer and visualization widget
+ * Implemets daefault drawing methods for different {@link IterationData} types
  */ 
 class GraphicsSource : public QObject {
     Q_OBJECT
@@ -58,13 +59,18 @@ public:
     GraphicsSource(QObject* parent = nullptr)
         : QObject(parent), m_auto_iteration(false), m_timer() {}
     void init(QGraphicsScene* scene) {
-        m_scene_rect = scale_rect(scene->sceneRect(), SCALE);
+        m_scene_rect = scale_rect(scene->sceneRect(), 1);
         std::cout << m_scene_rect.left() << " " << m_scene_rect.top() << " " << m_scene_rect.width() << " " << m_scene_rect.height() << std::endl;
         connect(&m_timer, &QTimer::timeout, this, &GraphicsSource::timeout);
         init_imp();
     }
 
     virtual void next_iteration() = 0;
+
+    void set_bounds(double left, double right) {
+        m_left = left;
+        m_right = right;
+    }
 
 public slots:
     void start_auto_iteration() {
@@ -143,6 +149,8 @@ protected:
     std::vector<QGraphicsItem*> m_prev_items;
     bool m_auto_iteration;
     QTimer m_timer;
+    double m_left;
+    double m_right;
 };
 
 class Lab1Window : public QMainWindow {

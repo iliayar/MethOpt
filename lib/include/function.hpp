@@ -15,11 +15,11 @@ class StdFunction;
 
 /** 
  * Simple interface to operate with functions
- * @code
+ * {@c
  * Function<double>* f = new StdFuntion<double>([](double x) { return x*x; });
  * double x = 0.5;
  * dobule y = (*f)(x); // y = 0.25
- * @endcode
+ * }
  * @tparam T function's argument and return value type.
  */
 template <typename T>
