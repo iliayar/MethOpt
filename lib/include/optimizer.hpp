@@ -137,3 +137,9 @@ public:
 protected:
     CountingFunction<T>* m_function;
 };
+
+template<typename T>
+std::pair<T, T> get_min(Optimizer<T>& optimizer) {
+    while(optimizer.forward());
+    return optimizer.get_min();
+}
