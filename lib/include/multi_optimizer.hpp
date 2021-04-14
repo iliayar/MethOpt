@@ -12,7 +12,11 @@ public:
     T sigma = static_cast<T>(1e-4);
 
     virtual std::pair<Vector<T>, T> find(QuadFunction<T>& function) = 0;
+
+    void iter() { m_iters++; }
+    int get_iterations() { return m_iters; }
     
 private:
+ int m_iters = 0;
     // TODO Store data
 };

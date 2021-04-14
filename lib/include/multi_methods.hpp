@@ -28,6 +28,7 @@ public:
             grad_x = function.grad(x);
             norm_grad_x = grad_x.norm();
             grad_x = grad_x * (1 / norm_grad_x);
+            this->iter();
         }
         return {x, f_x};
     }
@@ -48,6 +49,7 @@ public:
             Vector<T> y = grad_x * alpha;
             x = x - y;
             grad_x = function.grad(x);
+            this->iter();
         }
         return {x, function(x)};
     }
@@ -74,6 +76,7 @@ public:
             grad_x = curr_grad;
             Vector<T> p_beta = p * beta;
             p = grad_x * (-1) + p_beta;
+            this->iter();
         }
         return {x, function(x)};
     }
