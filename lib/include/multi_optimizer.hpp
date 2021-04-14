@@ -1,6 +1,18 @@
 #pragma once
 
-#include "multi_function.hpp"
+#include "multi_helpers.hpp"
+
+template<typename T>
+struct MultiIterationData {
+    Vector<T> x;
+    Vector<T> grad;
+
+    friend std::ostream& operator<<(std::ostream& o, MultiIterationData<T>& data) {
+        o << data.x << std::endl << data.grad;
+        return o;
+    }
+};
+
 
 /**
  * The class represents Optimizer for functions with several arguments.
@@ -13,10 +25,10 @@ public:
 
     virtual std::pair<Vector<T>, T> find(QuadFunction<T>& function) = 0;
 
-    void iter() { m_iters++; }
-    int get_iterations() { return m_iters; }
+    void iter(Vector<T> x, Vector<T> grad) { m_data.push_back({x, grad}); }
+    std::vector<MultiIterationData<T>> get_data() { return  m_data; }
     
 private:
- int m_iters = 0;
+    std::vector<MultiIterationData<T>> m_data;
     // TODO Store data
 };

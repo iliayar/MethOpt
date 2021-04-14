@@ -2,7 +2,6 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include "multi_function.hpp"
 #include "multi_methods.hpp"
 
 template<class O, typename T>
@@ -11,14 +10,18 @@ void test(QuadFunction<T>& func) {
     auto [x, f] = method.find(func);
     std::cout << x << std::endl;
     std::cout << f << std::endl;
-    std::cout << method.get_iterations() << std::endl;
+    auto data = method.get_data();
+    std::cout << data.size() << std::endl;
+    for(auto d : data) {
+        std::cout << d << std::endl;
+    }
 }
 
 int fired_main(
     int dim = fire::arg({"-d", "--dimension", "The dimenstion number"}),
     std::string file = fire::arg({"-f", "--file",
             "The input file with declaring function"}),
-    std::string method = fire::arg({"-m", "--method", "Choose one from: gradient, conjucting, steepest"})) {
+    std::string method = fire::arg({"-m", "--method", "Choose one from: gradient, conjugate, steepest"})) {
     std::ifstream in(file);
     Vector<Vector<double>> A(dim, Vector<double>(dim, 0));
     Vector<double> b(dim, 0);
@@ -37,7 +40,7 @@ int fired_main(
 
     if(method == "gradient") {
         test<GradientDescent<double>, double>(func);
-    } else if(method == "conjucting") {
+    } else if(method == "conjugate") {
         test<ConjugateGradient<double>, double>(func);
     } else if(method == "steepest") {
         test<SteepestDescent<double>, double>(func);

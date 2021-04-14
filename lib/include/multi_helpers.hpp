@@ -108,10 +108,10 @@ protected:
  * @tparam T The type of each component
  */
 template <typename T>
-class Matrix : public Vector<Vector<T>> {
+class Matrix {
 public:
     Matrix(Vector<Vector<T>> vec)
-        : Vector<Vector<T>>(vec) {}
+        : m_matrix(vec) {}
 
     /**
      * Perform basic matrix multiplication
@@ -156,6 +156,10 @@ public:
             .transpose()[0];
     }
 
+    Matrix<T> operator+(const Matrix<T>& other) const {
+        return Matrix<T>(m_matrix + other.m_matrix);
+    }
+
     friend std::ostream& operator<<(std::ostream& o, Matrix<T> m) {
         int height = m.size();
         int width = m[0].size();
@@ -167,6 +171,63 @@ public:
         }
         return o;
     }
+
+    Vector<T>& get(int i) { return m_matrix[i]; }
+    const Vector<T>& get(int i) const { return m_matrix[i]; }
+    Vector<T>& operator[](int i) { return get(i); }
+    const Vector<T>& operator[](int i) const { return get(i); }
+
+    int size() const { return m_matrix.size(); }
+
+private:
+    Vector<Vector<T>> m_matrix;
+};
+
+/**
+ * The class to store diag matrix. Stores only main diag.
+ */
+template <typename T>
+class DiagMatrix {
+public:
+    DiagMatrix(Vector<T> vec)
+        : m_diag(vec) {}
+
+    DiagMatrix<T> operator*(const DiagMatrix<T>& rhs) const {
+        DiagMatrix<T> res(Vector<T>(size(), 0));
+        for(int i = 0; i < size(); ++i) {
+            res[i] = get(i) * rhs[i];
+        }
+        return res;
+    }
+
+    Vector<T> operator*(const Vector<T>& rhs) const {
+        return (DiagMatrix(rhs) * *this).m_diag;
+    }
+
+    friend std::ostream& operator<<(std::ostream& o, DiagMatrix<T> m) {
+        int height = m.size();
+        int width = height;
+        for (int i = 0; i < height; ++i) {
+            for (int j = 0; j < width; ++j) {
+                if(i == j) {
+                    o << m.get(i, j) << " ";
+                } else {
+                    o << "0 ";
+                }
+            }
+            o << std::endl;
+        }
+        return o;
+    }
+
+    T& get(int i) { return m_diag[i]; }
+    const T& get(int i) const { return m_diag[i]; }
+    T& operator[](int i) { return get(i); }
+    const T& operator[](int i) const { return get(i); }
+
+    int size() const { return m_diag.size(); }
+private:
+    Vector<T> m_diag;
 };
 
 /**
