@@ -5,57 +5,48 @@
 #include <functional>
 #include <iostream>
 #include <type_traits>
+#include <cassert>
 
 #include "function.hpp"
-
-template <typename T>
-T vector_of(T n);
-template <typename T, int size, int... sizes>
-auto vector_of(T n);
 
 /**
  * The class represents \(T^{size}\) value. Implements algebraic operations
  * @tparam T The type of each component
  * @tparam size Number of components
  */
-template <typename T, int size>
+template <typename T>
 class Vector {
 public:
-    Vector() {}
+    Vector(std::vector<T> vec) : m_components(vec) {}
+    Vector(std::initializer_list<T> list) {
+        for(T e : list) {
+            m_components.push_back(e);
+        }
+    }
 
     /**
-     * Create the vector from variadic arguments. Checks if thay are same type
-     * and check if the number of arguments mathes the template parameter {@link
-     * #size}
+     * Creates the vector of provided size, filled with zeros
+     * @param n The size of vector
      */
-    template <typename... Args>
-    Vector(Args... args) {
-        static_assert(sizeof...(args) == size,
-                      "The number of arguments is not equals size of vector");
-        static_assert(
-            std::experimental::conjunction<std::is_same<Args, T>...>::value,
-            "The arguments must be same type");
-        int i = 0;
-        for (T arg : {std::forward<T>(args)...}) {
-            m_components[i++] = arg;
-        }
-    }
+    Vector(int n) : Vector(n, 0) {}
 
-    Vector(T value) {
-        for (int i = 0; i < size; ++i) {
-            m_components[i] = value;
-        }
-    }
+    /**
+     * Creates a vector with provided size, filled with providev value
+     * @param n The size of vector
+     * @param value The value to vector with
+     */
+    Vector(int n, T value) : m_components(n, value) {}
 
-    Vector<T, size> operator+(const Vector<T, size>& lhs) const {
-        Vector<T, size> res;
-        for (int i = 0; i < size; ++i) {
+    Vector<T> operator+(const Vector<T>& lhs) const {
+        assert(m_components.size() == lhs.m_components.size());
+        Vector<T> res(m_components.size());
+        for (int i = 0; i < m_components.size(); ++i) {
             res[i] = this->get(i) + lhs[i];
         }
         return res;
     }
 
-    Vector<T, size> operator-(const Vector<T, size>& lhs) const {
+    Vector<T> operator-(const Vector<T>& lhs) const {
         return lhs * (-1) + *this;
     }
 
@@ -64,34 +55,29 @@ public:
      * @param c constant value
      */
     template <typename C>
-    Vector<T, size> operator*(C c) const {
-        Vector<T, size> res = *this;
-        for (int i = 0; i < size; ++i) {
+    Vector<T> operator*(C c) const {
+        Vector<T> res = *this;
+        for (int i = 0; i < m_components.size(); ++i) {
             res[i] = res[i] * c;
         }
         return res;
     }
 
-    // template<typename C>
-    // friend Vector<T, size> operator *(C c, const Vector<T, size>& rhs) {
-    //     return rhs * c;
-    // }
-
     /**
      * Calculate the dot product of two vectors
      * @param other The second vector
      */
-    T operator*(const Vector<T, size>& other) const {
+    T operator*(const Vector<T>& other) const {
         T res = static_cast<T>(0);
-        for (int i = 0; i < size; ++i) {
+        for (int i = 0; i < m_components.size(); ++i) {
             res += m_components[i] * other[i];
         }
         return res;
     }
 
     friend std::ostream& operator<<(std::ostream& o,
-                                    const Vector<T, size>& vec) {
-        for (int i = 0; i < size; ++i) {
+                                    const Vector<T>& vec) {
+        for (int i = 0; i < vec.size(); ++i) {
             o << vec[i] << " ";
         }
         return o;
@@ -111,48 +97,32 @@ public:
     T& operator[](int i) { return get(i); }
     const T& operator[](int i) const { return get(i); }
 
-private:
-    T m_components[size];
+    int size() const { return m_components.size(); }
+
+protected:
+    std::vector<T> m_components;
 };
-
-template <typename T>
-T vector_of(T n) {
-    return n;
-}
-
-/**
- * Creates the vector of elements type T and dimension equals to number of
- * {@code int} template arguments, each dimennsion has an appropriate size and
- * fill all elements with provided value
- * @param n The value, to fill vectors with
- */
-template <typename T, int size, int... sizes>
-auto vector_of(T n) {
-    auto e = vector_of<T, sizes...>(n);
-    return Vector<decltype(e), size>(e);
-}
 
 /**
  * The class represents matrix. Implements multiplication
  * @tparam T The type of each component
- * @tparat height The height of matrx
- * @tparam width The width of matrix. By default equals {@code heigth}
  */
-template <typename T, int height, int width = height>
-class Matrix : public Vector<Vector<T, width>, height> {
+template <typename T>
+class Matrix : public Vector<Vector<T>> {
 public:
-    Matrix(Vector<Vector<T, width>, height> vec)
-        : Vector<Vector<T, width>, height>(vec) {}
+    Matrix(Vector<Vector<T>> vec)
+        : Vector<Vector<T>>(vec) {}
 
     /**
      * Perform basic matrix multiplication
      * @param rhs The other matrix
      */
-    template <int rwidth>
-    Matrix<T, height, rwidth> operator*(
-        const Matrix<T, width, rwidth>& rhs) const {
-        Matrix<T, height, rwidth> res =
-            vector_of<T, height, rwidth>(static_cast<T>(0));
+    Matrix<T> operator*(const Matrix<T>& rhs) const {
+        int height = this->size();
+        int width = this->get(0).size();
+        int rwidth = rhs[0].size();
+        assert(width == rhs.size());
+        Matrix<T> res(Vector<Vector<T>>(height, Vector<T>(rwidth)));
         for (int i = 0; i < height; ++i) {
             for (int j = 0; j < rwidth; ++j) {
                 for (int k = 0; k < width; ++k) {
@@ -163,8 +133,10 @@ public:
         return res;
     }
 
-    Matrix<T, width, height> transpose() const {
-        Matrix<T, width, height> res = vector_of<T, width, height>(0);
+    Matrix<T> transpose() const {
+        int height = this->size();
+        int width = this->get(0).size();
+        Matrix<T> res(Vector<Vector<T>>(width, Vector<T>(height)));
         for (int i = 0; i < width; ++i) {
             for (int j = 0; j < height; ++j) {
                 res[i][j] = this->get(j)[i];
@@ -178,14 +150,15 @@ public:
      * matrix with shape {@code (1, width)}
      * @param rhs The vector of size {@code width}
      */
-    Vector<T, height> operator*(const Vector<T, width>& rhs) const {
-        return (*this * (Matrix<T, 1, width>{Vector<Vector<T, width>, 1>(rhs)}
-                             .transpose()))
+    Vector<T> operator*(const Vector<T>& rhs) const {
+        assert(this->get(0).size() == rhs.size());
+        return (*this * (Matrix<T>{Vector<Vector<T>>(1, rhs)}.transpose()))
             .transpose()[0];
     }
 
-    friend std::ostream& operator<<(std::ostream& o,
-                                    Matrix<T, height, width> m) {
+    friend std::ostream& operator<<(std::ostream& o, Matrix<T> m) {
+        int height = m.size();
+        int width = m[0].size();
         for (int i = 0; i < height; ++i) {
             for (int j = 0; j < width; ++j) {
                 o << m[i][j] << " ";
@@ -203,71 +176,38 @@ public:
  * @tparam T The type of each element of argument {@link Vector}
  * @tparam arity The number of arguments
  */
-template <typename T, int arity>
+template <typename T>
 class QuadFunction {
 public:
-    QuadFunction(Matrix<T, arity> A, Vector<T, arity> b, T c)
+    QuadFunction(Matrix<T> A, Vector<T> b, T c)
         : m_A(A), m_b(b), m_c(c) {}
 
     /**
      * Call that function with giving arguments as {@link Vector}
      * @param The arguments
      */
-    T call(Vector<T, arity> args) {
+    T call(Vector<T> args) {
         return m_A * args * args * static_cast<T>(0.5) + m_b * args + m_c;
-    }
-
-    template <typename... Args>
-    T call(Args... args) {
-        static_assert(
-            sizeof...(args) == arity,
-            "The number of arguments is not equals arity of function");
-        static_assert(
-            std::experimental::conjunction<std::is_same<Args, T>...>::value,
-            "The arguments must be same type");
-        return call(Vector<T, arity>(args...));
-    }
-
-    template <typename... Args>
-    Vector<T, arity> grad(Args... args) {
-        static_assert(
-            sizeof...(args) == arity,
-            "The number of arguments is not equals arity of function");
-        static_assert(
-            std::experimental::conjunction<std::is_same<Args, T>...>::value,
-            "The arguments must be same type");
-        return grad(Vector<T, arity>(args...));
     }
 
     /**
      * Calculate gradient in giving point
      * @param args point
      */
-    Vector<T, arity> grad(Vector<T, arity> args) { return (m_A * args) + m_b; }
+    Vector<T> grad(Vector<T> args) { return (m_A * args) + m_b; }
 
-    Function<T>* to_single(Vector<T, arity> point) {
+    Function<T>* to_single(Vector<T> point) {
         return new StdFunction<T>([=](T x) {
             return this->call(point - this->grad(point) * x);
         });
     }
 
-    template <typename... Args>
-    T operator()(Args... args) {
-        return call(args...);
-    }
-    T operator()(Vector<T, arity> args) { return call(args); }
+    T operator()(Vector<T> args) { return call(args); }
+
+    int arity() { return m_b.size(); }
 
 // private:
-    Matrix<T, arity> m_A;
-    Vector<T, arity> m_b;
+    Matrix<T> m_A;
+    Vector<T> m_b;
     T m_c;
 };
-
-template <typename T>
-using Function3 = QuadFunction<T, 3>;
-
-template <typename T>
-using Vec3 = Vector<T, 3>;
-
-template <typename T>
-using Matrix3 = Matrix<T, 3>;
