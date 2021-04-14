@@ -20,6 +20,8 @@ if __name__ == '__main__':
     x, f, data = read_data(A, b, c, Method.GRADIENT_DESCENT)
     func = get_func(A, b, c)
     # print(x, f, data)
+    print(len(data))
+    exit(0)
     STEP = 200
     i = STEP - 1
     for d in data:

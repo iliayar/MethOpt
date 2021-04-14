@@ -3,10 +3,10 @@
 #include "multi_optimizer.hpp"
 #include "methods.hpp"
 
-template<typename T>
-class GradientDescent : public MultiOptimizer<T>{
+template<typename T, typename Matrix = Matrix<T>>
+class GradientDescent : public MultiOptimizer<T, Matrix>{
 public:
-    std::pair<Vector<T>, T> find(QuadFunction<T>& function) override {
+    std::pair<Vector<T>, T> find(QuadFunction<T, Matrix>& function) override {
         constexpr T e = 1e-4;
         T alpha = 0.5;
         Vector<T> x(function.arity(), 1);
@@ -34,10 +34,10 @@ public:
     }
 };
 
-template<typename T, class O = BrentMethod<T>>
-class SteepestDescent : public MultiOptimizer<T> {
+template<typename T, class O = BrentMethod<T>, typename Matrix = Matrix<T>>
+class SteepestDescent : public MultiOptimizer<T, Matrix> {
 public:
-    std::pair<Vector<T>, T> find(QuadFunction<T>& function) override {
+    std::pair<Vector<T>, T> find(QuadFunction<T, Matrix>& function) override {
         constexpr T e = 1e-4;
         T alpha;
         Vector<T> x(function.arity(), 1);
@@ -56,10 +56,10 @@ public:
 
 };
 
-template<typename T>
-class ConjugateGradient : public MultiOptimizer<T> {
+template<typename T, typename Matrix = Matrix<T>>
+class ConjugateGradient : public MultiOptimizer<T, Matrix> {
 public:
-    std::pair<Vector<T>, T> find(QuadFunction<T>& function) override {
+    std::pair<Vector<T>, T> find(QuadFunction<T, Matrix>& function) override {
         Vector<T> x(function.arity(), 1);
         Vector<T> grad_x = function.grad(x);
         Vector<T> p = grad_x * (-1);

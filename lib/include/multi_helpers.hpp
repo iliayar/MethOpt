@@ -110,7 +110,7 @@ protected:
 template <typename T>
 class Matrix {
 public:
-    Matrix(Vector<Vector<T>> vec)
+    explicit Matrix(Vector<Vector<T>> vec)
         : m_matrix(vec) {}
 
     /**
@@ -189,19 +189,19 @@ private:
 template <typename T>
 class DiagMatrix {
 public:
-    DiagMatrix(Vector<T> vec)
+    explicit DiagMatrix(Vector<T> vec)
         : m_diag(vec) {}
 
     DiagMatrix<T> operator*(const DiagMatrix<T>& rhs) const {
-        DiagMatrix<T> res(Vector<T>(size(), 0));
+        Vector<T> res(size(), 0);
         for(int i = 0; i < size(); ++i) {
             res[i] = get(i) * rhs[i];
         }
-        return res;
+        return DiagMatrix<T>(res);
     }
 
     Vector<T> operator*(const Vector<T>& rhs) const {
-        return (DiagMatrix(rhs) * *this).m_diag;
+        return (*this * DiagMatrix<T>(rhs)).m_diag;
     }
 
     friend std::ostream& operator<<(std::ostream& o, DiagMatrix<T> m) {
@@ -235,12 +235,12 @@ private:
  * a number. \(T^{arity} \to T\) Represented by Matrix A, Vector b and constant
  * c: \(f(x) = \frac{1}{2}Ax^2 + bx + c\)
  * @tparam T The type of each element of argument {@link Vector}
- * @tparam arity The number of arguments
+ * @tparam Matrix The type of matrix to use. Maybe be common and diag
  */
-template <typename T>
+template <typename T, typename Matrix = Matrix<T>>
 class QuadFunction {
 public:
-    QuadFunction(Matrix<T> A, Vector<T> b, T c)
+    QuadFunction(Matrix A, Vector<T> b, T c)
         : m_A(A), m_b(b), m_c(c) {}
 
     /**
@@ -248,7 +248,7 @@ public:
      * @param The arguments
      */
     T call(Vector<T> args) {
-        return m_A * args * args * static_cast<T>(0.5) + m_b * args + m_c;
+        return (m_A * args) * args * static_cast<T>(0.5) + m_b * args + m_c;
     }
 
     /**
@@ -268,7 +268,7 @@ public:
     int arity() { return m_b.size(); }
 
 // private:
-    Matrix<T> m_A;
+    Matrix m_A;
     Vector<T> m_b;
     T m_c;
 };
