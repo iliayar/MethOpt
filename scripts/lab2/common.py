@@ -13,11 +13,24 @@ Method.GRADIENT_DESCENT   = 'gradient'
 Method.STEEPEST_DESCENT   = 'steepest'
 Method.CONJUGATE_GRADIENT = 'conjugate'
 
-def read_data(A, b, c, method = Method.CONJUGATE_GRADIENT):
+class SteepestMethod:
+    pass
+SteepestMethod.DICHOTOMY      = 'dichotomy'
+SteepestMethod.PARABOLAS      = 'parabolas'
+SteepestMethod.GOLDENSECTIONS = 'goldensections'
+SteepestMethod.BRENT          = 'brent'
+SteepestMethod.FIBONACCI      = 'fibonacci'
+
+def read_data(A, b, c, method = Method.CONJUGATE_GRADIENT, initial = None, epsilon = 1e-4, steepest_method = SteepestMethod.BRENT, diag = False):
     with open('./input.txt', 'w') as f:
-        for i in A:
-            for j in i:
-                f.write(str(j) + ' ')
+        if type(A[0]) == list:
+            for i in A:
+                for j in i:
+                    f.write(str(j) + ' ')
+                f.write('\n')
+        else:
+            for i in A:
+                f.write(str(i[i]) + ' ')
             f.write('\n')
         for i in b:
             f.write(str(i) + ' ')
@@ -26,12 +39,22 @@ def read_data(A, b, c, method = Method.CONJUGATE_GRADIENT):
         f.write('\n')
     cli = PROJECT_ROOT + 'build/lab2cli/lab2cli'
     dim = len(b)
+    if initial == None:
+        initial = []
+    else:
+        initial = ['-i', ' '.join(initial)]
+    if diag:
+        diag = ['--diag']
+    else:
+        diag = []
     proc = subprocess.Popen(
         [cli,
          '-m', method,
          '-d', str(dim),
-         '-f', './input.txt'
-        ], stdout=subprocess.PIPE)
+         '-f', './input.txt',
+         '-e', str(epsilon),
+         '--smethod', steepest_method
+        ] + initial + diag, stdout=subprocess.PIPE)
     x = list(map(float, proc.stdout.readline().decode().split()))
     f = float(proc.stdout.readline().decode())
 
@@ -40,7 +63,14 @@ def read_data(A, b, c, method = Method.CONJUGATE_GRADIENT):
     for i in range(n):
         x = list(map(float, proc.stdout.readline().decode().split()))
         grad = list(map(float, proc.stdout.readline().decode().split()))
-        data += [(x, grad)]
+        other = []
+        while True:
+            has_other = int(proc.stdout.readline().decode())
+            if has_other == 1:
+                other.append(proc.stdout.readline().decode())
+            else:
+                break
+        data += [(x, grad, other)]
     return (x, f, data)
 
 def create_table(table, data):

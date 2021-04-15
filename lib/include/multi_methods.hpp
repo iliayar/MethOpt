@@ -6,16 +6,18 @@
 template<typename T, typename Matrix = Matrix<T>>
 class GradientDescent : public MultiOptimizer<T, Matrix>{
 public:
+    GradientDescent() : MultiOptimizer<T, Matrix>() {}
+    GradientDescent(Vector<T> initial, T eps) : MultiOptimizer<T, Matrix>(initial, eps) {}
+
     std::pair<Vector<T>, T> find(QuadFunction<T, Matrix>& function) override {
-        constexpr T e = 1e-4;
         T alpha = 0.5;
-        Vector<T> x(function.arity(), 1);
+        Vector<T> x = this->get_initial(function.arity());
         T f_x = function(x);
         Vector<T> grad_x = function.grad(x);
         T norm_grad_x = grad_x.norm();
         grad_x = grad_x * (1.0 / (norm_grad_x));
 
-        while (norm_grad_x >= e) {
+        while (norm_grad_x >= this->m_eps) {
             Vector<T> curr = grad_x * alpha;
             curr = x - curr;
             while (function(curr) >= f_x) {
@@ -28,7 +30,7 @@ public:
             grad_x = function.grad(x);
             norm_grad_x = grad_x.norm();
             grad_x = grad_x * (1 / norm_grad_x);
-            this->iter(x, grad_x);
+            this->iter(x, function.grad(x));
         }
         return {x, f_x};
     }
@@ -37,19 +39,21 @@ public:
 template<typename T, class O = BrentMethod<T>, typename Matrix = Matrix<T>>
 class SteepestDescent : public MultiOptimizer<T, Matrix> {
 public:
+    SteepestDescent() : MultiOptimizer<T, Matrix>() {}
+    SteepestDescent(Vector<T> initial, T eps) : MultiOptimizer<T, Matrix>(initial, eps) {}
+
     std::pair<Vector<T>, T> find(QuadFunction<T, Matrix>& function) override {
-        constexpr T e = 1e-4;
         T alpha;
-        Vector<T> x(function.arity(), 1);
+        Vector<T> x = this->get_initial(function.arity());
         Vector<T> grad_x = function.grad(x);
-        while (grad_x.norm() >= e) {
+        while (grad_x.norm() >= this->m_eps) {
             Function<T>* func_double = function.to_single(x);
-            O method(func_double, 0, 10, this->sigma);
+            O method(func_double, 0, 10, this->m_eps);
             alpha = get_min(method).first;
             Vector<T> y = grad_x * alpha;
             x = x - y;
             grad_x = function.grad(x);
-            this->iter(x, grad_x);
+            this->iter(x, grad_x, method.get_call_count());
         }
         return {x, function(x)};
     }
@@ -59,8 +63,11 @@ public:
 template<typename T, typename Matrix = Matrix<T>>
 class ConjugateGradient : public MultiOptimizer<T, Matrix> {
 public:
+    ConjugateGradient() : MultiOptimizer<T, Matrix>() {}
+    ConjugateGradient(Vector<T> initial, T eps) : MultiOptimizer<T, Matrix>(initial, eps) {}
+
     std::pair<Vector<T>, T> find(QuadFunction<T, Matrix>& function) override {
-        Vector<T> x(function.arity(), 1);
+        Vector<T> x = this->get_initial(function.arity());
         Vector<T> grad_x = function.grad(x);
         Vector<T> p = grad_x * (-1);
         double alpha;

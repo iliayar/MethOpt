@@ -3,11 +3,12 @@
 from common import *
 import matplotlib.pyplot as plt
 import numpy as np
+import random
 
 def get_func(A, b, c):
     A = np.array(A)
     b = np.array(b)
-    def f(x):
+    def f(*x):
         return 1/2 * A.dot(x).dot(x) + b.dot(x) + c
     return f
 
@@ -17,6 +18,92 @@ METHODS = [
     Method.CONJUGATE_GRADIENT
 ]
 
+STEEPEST_METHODS = [
+    SteepestMethod.DICHOTOMY,
+    SteepestMethod.PARABOLAS,
+    SteepestMethod.GOLDENSECTIONS,
+    SteepestMethod.BRENT,
+    SteepestMethod.FIBONACCI
+]
+
+def steepest_iterations(A, b, c):
+    for m in STEEPEST_METHODS:
+        x, f, data = read_data(A, b, c, Method.STEEPEST_DESCENT, steepest_method = m)
+        print(m)
+        counts = []
+        for (_, _, [iter_cnt]) in data:
+            counts.append(int(iter_cnt))
+        print('Avg:', sum(counts)/len(counts))
+        print('Med:', counts[len(counts)//2])
+
+def draw_iterations(A, b, c, method, level_step = 1, grad_step = 1, diag = False):
+    x, f, data = read_data(A, b, c, method, diag = diag)
+    func = get_func(A, b, c)
+    
+    print(method)
+    print('Iters:', len(data))
+    print('x*:', x)
+    print('f*:', f)
+    level_i = level_step - 1
+    grad_i = grad_step - 1
+    # last = 100
+    # skip = len(data) - last
+    prev_x = [1]*len(b)
+    levels = [func(*prev_x)]
+    x_min = 1
+    x_max = 1
+    y_min = 1
+    y_max = 1
+    for (p, grad, other) in data:
+        level_i = (level_i + 1) % level_step
+        grad_i = (grad_i + 1) % grad_step
+
+        if grad_i == 0:
+            x_min = min(x_min, p[0])
+            x_max = max(x_max, p[0])
+            y_min = min(y_min, p[1])
+            y_max = max(y_max, p[1])
+            plt.arrow(prev_x[0], prev_x[1], p[0] - prev_x[0], p[1] - prev_x[1], head_width=0.1, color='red')
+            prev_x = p
+        if level_i == 0:
+            levels.append(func(*p))
+    x_range = x_max - x_min
+    x_min = x_min - x_range/3
+    x_max = x_max + x_range/3
+    y_range = y_max - y_min
+    y_min = y_min - y_range/3
+    y_max = y_max + y_range/3
+    X = np.linspace(x_min, x_max, 200)
+    Y = np.linspace(y_min, y_max, 200)
+    Z = []
+    for x in X:
+        z = []
+        for y in Y:
+            z.append(func(x, y))
+        Z.append(z)
+    # print(levels)
+    levels = set(levels)
+    levels = list(levels)
+    levels.sort()
+    # print(levels)
+    plt.contour(X, Y, Z, levels = levels)
+    plt.show()
+
+def test(A, b, c):
+    # gen_steepest(A, b, c)
+    draw_iterations(A, b, c, METHODS[0], level_step=1, grad_step=1)
+    draw_iterations(A, b, c, METHODS[1], level_step=2, grad_step=1)
+    draw_iterations(A, b, c, METHODS[2], level_step=1, grad_step=1)
+
+def gen_diag(n, k, l = 1):
+    L = k / l
+    res = []
+    res.append([l] + [0]*(n - 1))
+    for i in range(1, n - 1):
+        r = random.random() * (L - l) + l
+        res.append([0]*i + [r] + [0]*(n - i - 1))
+    res.append([0]*(n - 1) + [L])
+    return res
 
 if __name__ == '__main__':
     # A = [[2, -1, 2],
@@ -24,39 +111,19 @@ if __name__ == '__main__':
     #      [2, -3, 11]]
     # b = [-100, 1, -30]
     # c = 10
-    A = [[2, -1],
-         [-1, 1]]
-    b = [-100, 1]
-    c = 10
-    x, f, data = read_data(A, b, c, METHODS[2])
-    func = get_func(A, b, c)
-    # print(x, f, data)
-    
-    print(len(data))
-    STEP = 1
-    i = STEP - 1
-    # last = 100
-    # skip = len(data) - last
-    levels = []
-    for (p, grad) in data:
-        plt.arrow(p[0], p[1], -grad[0], -grad[1], head_width=0.4, width=0.1, color='red')
-        i = (i + 1) % STEP
-        # skip -= 1
-        # if skip > 0:
-        #     continue
-        if i != 0:
-            continue
-        levels.append(func(p))
-    levels.sort()
-    X = np.linspace(0, 200, 100)
-    Y = np.linspace(0, 200, 100)
-    Z = []
-    for x in X:
-        z = []
-        for y in Y:
-            z.append(func((x, y)))
-        Z.append(z)
-    plt.contour(X, Y, Z, levels = levels)
-    plt.show()
+    print(gen_diag(10, 10))
+    exit(0)
+    first = ([[2, -1],  # A
+              [-1, 1]],
+             [-10, 1], # b
+             10)        # c
+
+    second = ([[3, -1], # A
+              [-1, 2]],
+             [0, 1], # b
+             0)        # c
+    # test(*first)
+    test(*second)
+
     
     

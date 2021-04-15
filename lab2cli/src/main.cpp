@@ -18,7 +18,7 @@ void test(QuadFunction<T, M>& func) {
 }
 
 template<typename T, typename M>
-int test(int dim, std::string method, M A, std::ifstream& in) {
+int test(int dim, std::string method, M A, std::ifstream& in, std::string steepest_method) {
     Vector<T> b(dim, 0);
     T c;
     for(int i = 0; i < dim; ++i) {
@@ -32,7 +32,19 @@ int test(int dim, std::string method, M A, std::ifstream& in) {
     } else if(method == "conjugate") {
         test<ConjugateGradient<T, M>, T, M>(func);
     } else if(method == "steepest") {
-        test<SteepestDescent<T, BrentMethod<T>, M>, T, M>(func);
+        if(steepest_method == "brent") {
+            test<SteepestDescent<T, BrentMethod<T>, M>, T, M>(func);
+        } else if(steepest_method == "dichotomy") {
+            test<SteepestDescent<T, DichotomyMethod<T>, M>, T, M>(func);
+        } else if(steepest_method == "parabolas") {
+            test<SteepestDescent<T, ParabolasMethod<T>, M>, T, M>(func);
+        } else if(steepest_method == "goldensections") {
+            test<SteepestDescent<T, GoldenSectionMethod<T>, M>, T, M>(func);
+        } else if(steepest_method == "fibonacci") {
+            test<SteepestDescent<T, FibonacciMethod<T>, M>, T, M>(func);
+        } else {
+            std::cerr << "Unknown steepest method provided" << std::endl;
+        }
     } else {
         std::cerr << "Unknown method provided" << std::endl;
     }
@@ -42,24 +54,35 @@ int test(int dim, std::string method, M A, std::ifstream& in) {
 
 int fired_main(
     int dim = fire::arg({"-d", "--dimension", "The dimenstion number"}),
+
     std::string file = fire::arg({"-f", "--file",
-            "The input file with declaring function"}),
-    std::string method = fire::arg({"-m", "--method", "Choose one from: gradient, conjugate, steepest"}),
-    bool diag = fire::arg({"--diag", "Use diagonal matrix instead of common"})) {
+                                  "The input file with declaring function"}),
+
+    std::string method = fire::arg(
+        {"-m", "--method", "Choose one from: gradient, conjugate, steepest"}),
+
+    bool diag = fire::arg({"--diag", "Use diagonal matrix instead of common"}),
+
+    fire::optional<std::string> initial =
+        fire::arg({"-i", "--initial",
+                   "The initial point, e.g. for --dimension=3 \"1 1 1\""}),
+
+    double eps = fire::arg({"-e", "--epsilon"}, 1e-4),
+
+    std::string steepest_method =
+        fire::arg({"--smethod",
+                   "Optimization method to use in steepest descent. Avaliable: "
+                   "dichotomy, parabolas, "
+                   "brent, goldensections, fibonacci"},
+                  "brent")) {
     std::ifstream in(file);
     if(diag) {
         Vector<double> A(dim, 0);
         for (int i = 0; i < dim; ++i) {
-            for (int j = 0; j < dim; ++j) {
-                if (i == j) {
-                    in >> A[i];
-                } else {
-                    int t;
-                    in >> t;
-                }
-            }
+            in >> A[i];
         }
-        test<double, DiagMatrix<double>>(dim, method, DiagMatrix<double>(A), in);
+        test<double, DiagMatrix<double>>(dim, method, DiagMatrix<double>(A),
+                                         in, steepest_method);
     } else {
         Vector<Vector<double>> A(dim, Vector<double>(dim, 0));
         for (int i = 0; i < dim; ++i) {
@@ -67,7 +90,7 @@ int fired_main(
                 in >> A[i][j];
             }
         }
-        test<double, Matrix<double>>(dim, method, Matrix<double>(A), in);
+        test<double, Matrix<double>>(dim, method, Matrix<double>(A), in, steepest_method);
     }
     return 0;
 }
