@@ -18,7 +18,7 @@ void test(QuadFunction<T, M>& func) {
 }
 
 template<typename T, typename M>
-int test(int dim, std::string method, M A, std::ifstream& in, std::string steepest_method) {
+int test(int dim, std::string method, M A, std::istream& in, std::string steepest_method) {
     Vector<T> b(dim, 0);
     T c;
     for(int i = 0; i < dim; ++i) {
@@ -52,6 +52,26 @@ int test(int dim, std::string method, M A, std::ifstream& in, std::string steepe
     return 0;
 }
 
+int test(int dim, std::string method, std::string steepest_method, std::istream& in, bool diag) {
+    if(diag) {
+        Vector<double> A(dim, 0);
+        for (int i = 0; i < dim; ++i) {
+            in >> A[i];
+        }
+        test<double, DiagMatrix<double>>(dim, method, DiagMatrix<double>(A),
+                                         in, steepest_method);
+    } else {
+        Vector<Vector<double>> A(dim, Vector<double>(dim, 0));
+        for (int i = 0; i < dim; ++i) {
+            for (int j = 0; j < dim; ++j) {
+                in >> A[i][j];
+            }
+        }
+        test<double, Matrix<double>>(dim, method, Matrix<double>(A), in, steepest_method);
+    }
+    return 0;
+}
+
 int fired_main(
     int dim = fire::arg({"-d", "--dimension", "The dimenstion number"}),
 
@@ -75,24 +95,12 @@ int fired_main(
                    "dichotomy, parabolas, "
                    "brent, goldensections, fibonacci"},
                   "brent")) {
-    std::ifstream in(file);
-    if(diag) {
-        Vector<double> A(dim, 0);
-        for (int i = 0; i < dim; ++i) {
-            in >> A[i];
-        }
-        test<double, DiagMatrix<double>>(dim, method, DiagMatrix<double>(A),
-                                         in, steepest_method);
+    if(file == "-") {
+        return test(dim, method, steepest_method, std::cin, diag);
     } else {
-        Vector<Vector<double>> A(dim, Vector<double>(dim, 0));
-        for (int i = 0; i < dim; ++i) {
-            for (int j = 0; j < dim; ++j) {
-                in >> A[i][j];
-            }
-        }
-        test<double, Matrix<double>>(dim, method, Matrix<double>(A), in, steepest_method);
+        std::ifstream in(file);
+        return test(dim, method, steepest_method, in, diag);
     }
-    return 0;
 }
 
 FIRE(fired_main)

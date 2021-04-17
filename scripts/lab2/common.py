@@ -3,6 +3,7 @@ import os
 import subprocess
 import csv
 import numpy as np
+import io
 
 PROJECT_ROOT = os.path.dirname(os.path.realpath((__file__))) + '/../../'
 
@@ -22,21 +23,6 @@ SteepestMethod.BRENT          = 'brent'
 SteepestMethod.FIBONACCI      = 'fibonacci'
 
 def read_data(A, b, c, method = Method.CONJUGATE_GRADIENT, initial = None, epsilon = 1e-4, steepest_method = SteepestMethod.BRENT, diag = False):
-    with open('./input.txt', 'w') as f:
-        if type(A[0]) == list:
-            for i in A:
-                for j in i:
-                    f.write(str(j) + ' ')
-                f.write('\n')
-        else:
-            for i in A:
-                f.write(str(i[i]) + ' ')
-            f.write('\n')
-        for i in b:
-            f.write(str(i) + ' ')
-        f.write('\n')
-        f.write(str(c))
-        f.write('\n')
     cli = PROJECT_ROOT + 'build/lab2cli/lab2cli'
     dim = len(b)
     if initial == None:
@@ -51,23 +37,34 @@ def read_data(A, b, c, method = Method.CONJUGATE_GRADIENT, initial = None, epsil
         [cli,
          '-m', method,
          '-d', str(dim),
-         '-f', './input.txt',
+         '-f', '-',
          '-e', str(epsilon),
          '--smethod', steepest_method
-        ] + initial + diag, stdout=subprocess.PIPE)
-    x = list(map(float, proc.stdout.readline().decode().split()))
-    f = float(proc.stdout.readline().decode())
+         ] + initial + diag, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+    inp = []
+    if not diag:
+        for i in A:
+            inp.append(' '.join(map(str, i)))
+    else:
+        inp.append(' '.join([str(A[i][i]) for i in range(len(b))]))
+    inp.append(' '.join(map(str, b)))
+    inp.append(str(c))
+
+    out = io.StringIO(proc.communicate('\n'.join(inp).encode())[0].decode())
+
+    x = list(map(float, out.readline().split()))
+    f = float(out.readline())
 
     data = []
-    n = int(proc.stdout.readline().decode())
+    n = int(out.readline())
     for i in range(n):
-        x = list(map(float, proc.stdout.readline().decode().split()))
-        grad = list(map(float, proc.stdout.readline().decode().split()))
+        x = list(map(float, out.readline().split()))
+        grad = list(map(float, out.readline().split()))
         other = []
         while True:
-            has_other = int(proc.stdout.readline().decode())
+            has_other = int(out.readline())
             if has_other == 1:
-                other.append(proc.stdout.readline().decode())
+                other.append(out.readline())
             else:
                 break
         data += [(x, grad, other)]

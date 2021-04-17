@@ -30,7 +30,7 @@ public:
             grad_x = function.grad(x);
             norm_grad_x = grad_x.norm();
             grad_x = grad_x * (1 / norm_grad_x);
-            this->iter(x, function.grad(x));
+            if(!this->iter(x, function.grad(x))) break;
         }
         return {x, f_x};
     }
@@ -53,7 +53,7 @@ public:
             Vector<T> y = grad_x * alpha;
             x = x - y;
             grad_x = function.grad(x);
-            this->iter(x, grad_x, method.get_call_count());
+            if(!this->iter(x, grad_x, method.get_call_count())) break;
         }
         return {x, function(x)};
     }
@@ -83,7 +83,7 @@ public:
             grad_x = curr_grad;
             Vector<T> p_beta = p * beta;
             p = grad_x * (-1) + p_beta;
-            this->iter(x, grad_x);
+            if(!this->iter(x, grad_x)) break;
         }
         return {x, function(x)};
     }

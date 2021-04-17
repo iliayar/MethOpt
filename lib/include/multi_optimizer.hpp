@@ -29,14 +29,20 @@ template <typename T, typename Matrix = Matrix<T>>
 class MultiOptimizer {
 public:
 
+    const int MAX_ITERATIONS = 1e+4;
+
     MultiOptimizer() : m_initial({}), m_eps(static_cast<T>(1e-4)) {}
     MultiOptimizer(Vector<T> initial, T eps) : m_initial(initial), m_eps(eps) {}
 
     virtual std::pair<Vector<T>, T> find(QuadFunction<T, Matrix>& function) = 0;
 
-    void iter(Vector<T> x, Vector<T> grad,
+    bool iter(Vector<T> x, Vector<T> grad,
               std::experimental::optional<int> steepest_iter = {}) {
         m_data.push_back({x, grad, steepest_iter});
+        if(m_data.size() > MAX_ITERATIONS) {
+            return false;
+        }
+        return true;
     }
     std::vector<MultiIterationData<T>> get_data() { return m_data; }
 
@@ -45,7 +51,7 @@ protected:
 
     Vector<T> get_initial(int arity) {
         if(m_initial) {
-            return m_initial;
+            return m_initial.value();
         } else {
             return Vector<T>(arity, 1);
         }
