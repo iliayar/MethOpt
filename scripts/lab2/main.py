@@ -95,12 +95,12 @@ def test(A, b, c):
     draw_contours(A, b, c, METHODS[1], level_step=2, grad_step=1)
     draw_contours(A, b, c, METHODS[2], level_step=1, grad_step=1)
 
-def test_counts(n, k, method, N = 10):
+def test_counts(n, k, method, N = 3):
     s = 0
     for i in range(N):
         diag = gen_diag(n, k)
-        x, f, data = read_data(*diag, method, diag = diag)
-        s += len(data)
+        x, f, data_len = read_data(*diag, method, diag = True, no_data = True)
+        s += data_len
     return s / N
 
 def plot_counts(method, n, K = 200, K_STEP = 10):
@@ -138,7 +138,7 @@ if __name__ == '__main__':
              [0, 1], # b
              0)        # c
     for i in range(1, 5):
-        plot_counts(METHODS[0], 10**i, K = 2000, K_STEP=100)
+        plot_counts(METHODS[2], 10**i, K = 2000, K_STEP=500)
     plt.show()
     # test(*first)
     # test(*second)

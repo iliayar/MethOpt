@@ -5,20 +5,22 @@
 #include "multi_methods.hpp"
 
 template<class O, typename T, typename M>
-void test(QuadFunction<T, M>& func) {
+void test(QuadFunction<T, M>& func, bool no_data) {
     O method{};
     auto [x, f] = method.find(func);
     std::cout << x << std::endl;
     std::cout << f << std::endl;
     auto data = method.get_data();
     std::cout << data.size() << std::endl;
-    for(auto d : data) {
-        std::cout << d << std::endl;
+    if(!no_data) {
+        for (auto d : data) {
+            std::cout << d << std::endl;
+        }
     }
 }
 
 template<typename T, typename M>
-int test(int dim, std::string method, M A, std::istream& in, std::string steepest_method) {
+int test(int dim, std::string method, M A, std::istream& in, std::string steepest_method, bool no_data) {
     Vector<T> b(dim, 0);
     T c;
     for(int i = 0; i < dim; ++i) {
@@ -28,20 +30,20 @@ int test(int dim, std::string method, M A, std::istream& in, std::string steepes
     QuadFunction<T, M> func(A, b, c);
 
     if(method == "gradient") {
-        test<GradientDescent<T, M>, T, M>(func);
+        test<GradientDescent<T, M>, T, M>(func, no_data);
     } else if(method == "conjugate") {
-        test<ConjugateGradient<T, M>, T, M>(func);
+        test<ConjugateGradient<T, M>, T, M>(func, no_data);
     } else if(method == "steepest") {
         if(steepest_method == "brent") {
-            test<SteepestDescent<T, BrentMethod<T>, M>, T, M>(func);
+            test<SteepestDescent<T, BrentMethod<T>, M>, T, M>(func, no_data);
         } else if(steepest_method == "dichotomy") {
-            test<SteepestDescent<T, DichotomyMethod<T>, M>, T, M>(func);
+            test<SteepestDescent<T, DichotomyMethod<T>, M>, T, M>(func, no_data);
         } else if(steepest_method == "parabolas") {
-            test<SteepestDescent<T, ParabolasMethod<T>, M>, T, M>(func);
+            test<SteepestDescent<T, ParabolasMethod<T>, M>, T, M>(func, no_data);
         } else if(steepest_method == "goldensections") {
-            test<SteepestDescent<T, GoldenSectionMethod<T>, M>, T, M>(func);
+            test<SteepestDescent<T, GoldenSectionMethod<T>, M>, T, M>(func, no_data);
         } else if(steepest_method == "fibonacci") {
-            test<SteepestDescent<T, FibonacciMethod<T>, M>, T, M>(func);
+            test<SteepestDescent<T, FibonacciMethod<T>, M>, T, M>(func, no_data);
         } else {
             std::cerr << "Unknown steepest method provided" << std::endl;
         }
@@ -52,14 +54,14 @@ int test(int dim, std::string method, M A, std::istream& in, std::string steepes
     return 0;
 }
 
-int test(int dim, std::string method, std::string steepest_method, std::istream& in, bool diag) {
+int test(int dim, std::string method, std::string steepest_method, std::istream& in, bool diag, bool no_data) {
     if(diag) {
         Vector<double> A(dim, 0);
         for (int i = 0; i < dim; ++i) {
             in >> A[i];
         }
         test<double, DiagMatrix<double>>(dim, method, DiagMatrix<double>(A),
-                                         in, steepest_method);
+                                         in, steepest_method, no_data);
     } else {
         Vector<Vector<double>> A(dim, Vector<double>(dim, 0));
         for (int i = 0; i < dim; ++i) {
@@ -67,7 +69,7 @@ int test(int dim, std::string method, std::string steepest_method, std::istream&
                 in >> A[i][j];
             }
         }
-        test<double, Matrix<double>>(dim, method, Matrix<double>(A), in, steepest_method);
+        test<double, Matrix<double>>(dim, method, Matrix<double>(A), in, steepest_method, no_data);
     }
     return 0;
 }
@@ -76,7 +78,7 @@ int fired_main(
     int dim = fire::arg({"-d", "--dimension", "The dimenstion number"}),
 
     std::string file = fire::arg({"-f", "--file",
-                                  "The input file with declaring function"}),
+                                  "The input file with declaring function. - To read from stdin"}),
 
     std::string method = fire::arg(
         {"-m", "--method", "Choose one from: gradient, conjugate, steepest"}),
@@ -94,12 +96,13 @@ int fired_main(
                    "Optimization method to use in steepest descent. Avaliable: "
                    "dichotomy, parabolas, "
                    "brent, goldensections, fibonacci"},
-                  "brent")) {
+            "brent"),
+    bool no_data = fire::arg({"--no-data", "Do not output interation data"})) {
     if(file == "-") {
-        return test(dim, method, steepest_method, std::cin, diag);
+        return test(dim, method, steepest_method, std::cin, diag, no_data);
     } else {
         std::ifstream in(file);
-        return test(dim, method, steepest_method, in, diag);
+        return test(dim, method, steepest_method, in, diag, no_data);
     }
 }
 

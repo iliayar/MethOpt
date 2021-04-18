@@ -22,7 +22,7 @@ SteepestMethod.GOLDENSECTIONS = 'goldensections'
 SteepestMethod.BRENT          = 'brent'
 SteepestMethod.FIBONACCI      = 'fibonacci'
 
-def read_data(A, b, c, method = Method.CONJUGATE_GRADIENT, initial = None, epsilon = 1e-4, steepest_method = SteepestMethod.BRENT, diag = False):
+def read_data(A, b, c, method = Method.CONJUGATE_GRADIENT, initial = None, epsilon = 1e-4, steepest_method = SteepestMethod.BRENT, diag = False, no_data = False):
     cli = PROJECT_ROOT + 'build/lab2cli/lab2cli'
     dim = len(b)
     if initial == None:
@@ -33,6 +33,10 @@ def read_data(A, b, c, method = Method.CONJUGATE_GRADIENT, initial = None, epsil
         diag = ['--diag']
     else:
         diag = []
+    if no_data:
+        no_data = ['--no-data']
+    else:
+        no_data = []
     proc = subprocess.Popen(
         [cli,
          '-m', method,
@@ -40,7 +44,7 @@ def read_data(A, b, c, method = Method.CONJUGATE_GRADIENT, initial = None, epsil
          '-f', '-',
          '-e', str(epsilon),
          '--smethod', steepest_method
-         ] + initial + diag, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+         ] + initial + diag + no_data, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
     inp = []
     if not diag:
         for i in A:
@@ -50,13 +54,16 @@ def read_data(A, b, c, method = Method.CONJUGATE_GRADIENT, initial = None, epsil
     inp.append(' '.join(map(str, b)))
     inp.append(str(c))
 
-    out = io.StringIO(proc.communicate('\n'.join(inp).encode())[0].decode())
+    out_raw = proc.communicate('\n'.join(inp).encode())[0].decode()
+    out = io.StringIO(out_raw)
 
     x = list(map(float, out.readline().split()))
     f = float(out.readline())
 
     data = []
     n = int(out.readline())
+    if len(no_data) == 1:
+        return (x, f, n)
     for i in range(n):
         x = list(map(float, out.readline().split()))
         grad = list(map(float, out.readline().split()))
