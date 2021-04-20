@@ -2,15 +2,21 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <sstream>
 #include "multi_methods.hpp"
 
 template<class O, typename T, typename M>
-void test(QuadFunction<T, M>& func, bool no_data) {
-    O method{};
-    auto [x, f] = method.find(func);
+void test(QuadFunction<T, M>& func, bool no_data, std::experimental::optional<std::vector<T>> init_vec) {
+    O* method;
+    if(init_vec) {
+        method = new O(init_vec.value());
+    } else {
+        method = new O();
+    }
+    auto [x, f] = method->find(func);
     std::cout << x << std::endl;
     std::cout << f << std::endl;
-    auto data = method.get_data();
+    auto data = method->get_data();
     std::cout << data.size() << std::endl;
     if(!no_data) {
         for (auto d : data) {
@@ -20,7 +26,7 @@ void test(QuadFunction<T, M>& func, bool no_data) {
 }
 
 template<typename T, typename M>
-int test(int dim, std::string method, M A, std::istream& in, std::string steepest_method, bool no_data) {
+int test(int dim, std::string method, M A, std::istream& in, std::string steepest_method, bool no_data, std::experimental::optional<std::vector<T>> init_vec) {
     Vector<T> b(dim, 0);
     T c;
     for(int i = 0; i < dim; ++i) {
@@ -30,20 +36,20 @@ int test(int dim, std::string method, M A, std::istream& in, std::string steepes
     QuadFunction<T, M> func(A, b, c);
 
     if(method == "gradient") {
-        test<GradientDescent<T, M>, T, M>(func, no_data);
+        test<GradientDescent<T, M>, T, M>(func, no_data, init_vec);
     } else if(method == "conjugate") {
-        test<ConjugateGradient<T, M>, T, M>(func, no_data);
+        test<ConjugateGradient<T, M>, T, M>(func, no_data, init_vec);
     } else if(method == "steepest") {
         if(steepest_method == "brent") {
-            test<SteepestDescent<T, BrentMethod<T>, M>, T, M>(func, no_data);
+            test<SteepestDescent<T, BrentMethod<T>, M>, T, M>(func, no_data, init_vec);
         } else if(steepest_method == "dichotomy") {
-            test<SteepestDescent<T, DichotomyMethod<T>, M>, T, M>(func, no_data);
+            test<SteepestDescent<T, DichotomyMethod<T>, M>, T, M>(func, no_data, init_vec);
         } else if(steepest_method == "parabolas") {
-            test<SteepestDescent<T, ParabolasMethod<T>, M>, T, M>(func, no_data);
+            test<SteepestDescent<T, ParabolasMethod<T>, M>, T, M>(func, no_data, init_vec);
         } else if(steepest_method == "goldensections") {
-            test<SteepestDescent<T, GoldenSectionMethod<T>, M>, T, M>(func, no_data);
+            test<SteepestDescent<T, GoldenSectionMethod<T>, M>, T, M>(func, no_data, init_vec);
         } else if(steepest_method == "fibonacci") {
-            test<SteepestDescent<T, FibonacciMethod<T>, M>, T, M>(func, no_data);
+            test<SteepestDescent<T, FibonacciMethod<T>, M>, T, M>(func, no_data, init_vec);
         } else {
             std::cerr << "Unknown steepest method provided" << std::endl;
         }
@@ -54,14 +60,14 @@ int test(int dim, std::string method, M A, std::istream& in, std::string steepes
     return 0;
 }
 
-int test(int dim, std::string method, std::string steepest_method, std::istream& in, bool diag, bool no_data) {
+int test(int dim, std::string method, std::string steepest_method, std::istream& in, bool diag, bool no_data, std::experimental::optional<std::vector<double>> init_vec) {
     if(diag) {
         Vector<double> A(dim, 0);
         for (int i = 0; i < dim; ++i) {
             in >> A[i];
         }
         test<double, DiagMatrix<double>>(dim, method, DiagMatrix<double>(A),
-                                         in, steepest_method, no_data);
+                                         in, steepest_method, no_data, init_vec);
     } else {
         Vector<Vector<double>> A(dim, Vector<double>(dim, 0));
         for (int i = 0; i < dim; ++i) {
@@ -69,7 +75,7 @@ int test(int dim, std::string method, std::string steepest_method, std::istream&
                 in >> A[i][j];
             }
         }
-        test<double, Matrix<double>>(dim, method, Matrix<double>(A), in, steepest_method, no_data);
+        test<double, Matrix<double>>(dim, method, Matrix<double>(A), in, steepest_method, no_data, init_vec);
     }
     return 0;
 }
@@ -98,11 +104,18 @@ int fired_main(
                    "brent, goldensections, fibonacci"},
             "brent"),
     bool no_data = fire::arg({"--no-data", "Do not output interation data"})) {
+    std::experimental::optional<std::vector<double>> initial_vec = {};
+    if(initial) {
+        std::stringstream ss(initial.value());
+        std::vector<double> new_init(dim, 0);
+        for(double& c : new_init) ss >> c;
+        initial_vec = new_init;
+    }
     if(file == "-") {
-        return test(dim, method, steepest_method, std::cin, diag, no_data);
+        return test(dim, method, steepest_method, std::cin, diag, no_data, initial_vec);
     } else {
         std::ifstream in(file);
-        return test(dim, method, steepest_method, in, diag, no_data);
+        return test(dim, method, steepest_method, in, diag, no_data, initial_vec);
     }
 }
 

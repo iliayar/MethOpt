@@ -28,7 +28,7 @@ def read_data(A, b, c, method = Method.CONJUGATE_GRADIENT, initial = None, epsil
     if initial == None:
         initial = []
     else:
-        initial = ['-i', ' '.join(initial)]
+        initial = ['-i', ' '.join(map(str, initial))]
     if diag:
         diag = ['--diag']
     else:
@@ -53,8 +53,8 @@ def read_data(A, b, c, method = Method.CONJUGATE_GRADIENT, initial = None, epsil
         inp.append(' '.join([str(A[i][i]) for i in range(len(b))]))
     inp.append(' '.join(map(str, b)))
     inp.append(str(c))
-
-    out_raw = proc.communicate('\n'.join(inp).encode())[0].decode()
+    inp = '\n'.join(inp).encode()
+    out_raw = proc.communicate(inp)[0].decode()
     out = io.StringIO(out_raw)
 
     x = list(map(float, out.readline().split()))

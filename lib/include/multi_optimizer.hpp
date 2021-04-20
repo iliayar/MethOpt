@@ -29,9 +29,10 @@ template <typename T, typename Matrix = Matrix<T>>
 class MultiOptimizer {
 public:
 
-    const int MAX_ITERATIONS = 1e+4;
+    const int MAX_ITERATIONS = 1e+6;
 
-    MultiOptimizer() : m_initial({}), m_eps(static_cast<T>(1e-4)) {}
+    MultiOptimizer() : m_initial({}), m_eps(static_cast<T>(1e-3)) {}
+    MultiOptimizer(Vector<T> initial) : m_initial(initial), m_eps(static_cast<T>(1e-3)) {}
     MultiOptimizer(Vector<T> initial, T eps) : m_initial(initial), m_eps(eps) {}
 
     virtual std::pair<Vector<T>, T> find(QuadFunction<T, Matrix>& function) = 0;

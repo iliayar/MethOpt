@@ -36,8 +36,8 @@ def steepest_iterations(A, b, c):
         print('Avg:', sum(counts)/len(counts))
         print('Med:', counts[len(counts)//2])
 
-def draw_contours(A, b, c, method, level_step = 1, grad_step = 1, diag = False):
-    x, f, data = read_data(A, b, c, method, diag = diag)
+def draw_contours(A, b, c, method, level_step = 1, delta_step = 1, diag = False, initial = None):
+    x, f, data = read_data(A, b, c, method, diag = diag, initial = initial)
     func = get_func(A, b, c)
     
     print(method)
@@ -45,25 +45,25 @@ def draw_contours(A, b, c, method, level_step = 1, grad_step = 1, diag = False):
     print('x*:', x)
     print('f*:', f)
     level_i = level_step - 1
-    grad_i = grad_step - 1
+    delta_i = delta_step - 1
     # last = 100
     # skip = len(data) - last
-    prev_x = [1]*len(b)
+    prev_x = [1]*len(b) if initial == None else initial
     levels = [func(*prev_x)]
-    x_min = 1
-    x_max = 1
-    y_min = 1
-    y_max = 1
+    x_min = prev_x[0]
+    x_max = prev_x[0]
+    y_min = prev_x[1]
+    y_max = prev_x[1]
     for (p, grad, other) in data:
         level_i = (level_i + 1) % level_step
-        grad_i = (grad_i + 1) % grad_step
+        delta_i = (delta_i + 1) % delta_step
 
-        if grad_i == 0:
+        if delta_i == 0:
             x_min = min(x_min, p[0])
             x_max = max(x_max, p[0])
             y_min = min(y_min, p[1])
             y_max = max(y_max, p[1])
-            plt.arrow(prev_x[0], prev_x[1], p[0] - prev_x[0], p[1] - prev_x[1], head_width=0.1, color='red')
+            plt.arrow(prev_x[0], prev_x[1], p[0] - prev_x[0], p[1] - prev_x[1], head_width=0.02, width=0.002, color='red')
             prev_x = p
         if level_i == 0:
             levels.append(func(*p))
@@ -76,9 +76,9 @@ def draw_contours(A, b, c, method, level_step = 1, grad_step = 1, diag = False):
     X = np.linspace(x_min, x_max, 200)
     Y = np.linspace(y_min, y_max, 200)
     Z = []
-    for x in X:
+    for y in Y:
         z = []
-        for y in Y:
+        for x in X:
             z.append(func(x, y))
         Z.append(z)
     # print(levels)
@@ -86,16 +86,20 @@ def draw_contours(A, b, c, method, level_step = 1, grad_step = 1, diag = False):
     levels = list(levels)
     levels.sort()
     # print(levels)
-    plt.contour(X, Y, Z, levels = levels)
-    plt.show()
+    cntrs = plt.contour(X, Y, Z, levels = levels)
+    fmt = {}
+    for c in cntrs.levels:
+        fmt[c] = '%.02f' % c
+    plt.clabel(cntrs, cntrs.levels[::1], fmt=fmt)
+    # plt.show()
 
-def test(A, b, c):
+def test(A, b, c, method):
     # gen_steepest(A, b, c)
     draw_contours(A, b, c, METHODS[0], level_step=1, grad_step=1)
     draw_contours(A, b, c, METHODS[1], level_step=2, grad_step=1)
     draw_contours(A, b, c, METHODS[2], level_step=1, grad_step=1)
 
-def test_counts(n, k, method, N = 3):
+def test_counts(n, k, method, N = 2):
     s = 0
     for i in range(N):
         diag = gen_diag(n, k)
@@ -110,7 +114,7 @@ def plot_counts(method, n, K = 200, K_STEP = 10):
         print(f"k = {k}")
         counts.append(test_counts(n, k, method))
 
-    plt.plot(ks, counts);
+    plt.plot(ks, counts, label=('n = ' + str(n)));
 
 def gen_diag(n, k, l = 1):
     L = k * l
@@ -128,18 +132,25 @@ if __name__ == '__main__':
     #      [2, -3, 11]]
     # b = [-100, 1, -30]
     # c = 10
-    first = ([[2, -1],  # A
+    first = ([[100, -1],  # A
               [-1, 1]],
-             [-10, 1], # b
-             10)        # c
+             [-10, 0], # b
+             0)        # c
 
     second = ([[3, -1], # A
               [-1, 2]],
-             [0, 1], # b
+             [-5, 2], # b
              0)        # c
-    for i in range(1, 5):
-        plot_counts(METHODS[2], 10**i, K = 2000, K_STEP=500)
-    plt.show()
+
+    third = ([[1, -1], # A
+              [-1, 2]],
+             [-10, 2], # b
+             0)        # c
+    draw_contours(*first, METHODS[2], level_step=1, delta_step=1, initial=[1.6, -1])
+    # for i in range(1, 5):
+    #     plot_counts(METHODS[0], 10**i, K = 2002, K_STEP=500)
+    # plt.legend()
+    # plt.show()
     # test(*first)
     # test(*second)
 

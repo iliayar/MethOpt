@@ -257,6 +257,10 @@ public:
      */
     Vector<T> grad(Vector<T> args) { return (m_A * args) + m_b; }
 
+    /**
+     * Creates a single argument function: \(\alpha - \nabla f(\alpha) * x\)
+     * @param point \(\alpha\)
+     */
     Function<T>* to_single(Vector<T> point) {
         return new StdFunction<T>([=](T x) {
             return this->call(point - this->grad(point) * x);

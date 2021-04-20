@@ -7,6 +7,7 @@ template<typename T, typename Matrix = Matrix<T>>
 class GradientDescent : public MultiOptimizer<T, Matrix>{
 public:
     GradientDescent() : MultiOptimizer<T, Matrix>() {}
+    GradientDescent(Vector<T> initial) : MultiOptimizer<T, Matrix>(initial) {}
     GradientDescent(Vector<T> initial, T eps) : MultiOptimizer<T, Matrix>(initial, eps) {}
 
     std::pair<Vector<T>, T> find(QuadFunction<T, Matrix>& function) override {
@@ -40,6 +41,7 @@ template<typename T, class O = BrentMethod<T>, typename Matrix = Matrix<T>>
 class SteepestDescent : public MultiOptimizer<T, Matrix> {
 public:
     SteepestDescent() : MultiOptimizer<T, Matrix>() {}
+    SteepestDescent(Vector<T> initial) : MultiOptimizer<T, Matrix>(initial) {}
     SteepestDescent(Vector<T> initial, T eps) : MultiOptimizer<T, Matrix>(initial, eps) {}
 
     std::pair<Vector<T>, T> find(QuadFunction<T, Matrix>& function) override {
@@ -64,6 +66,7 @@ template<typename T, typename Matrix = Matrix<T>>
 class ConjugateGradient : public MultiOptimizer<T, Matrix> {
 public:
     ConjugateGradient() : MultiOptimizer<T, Matrix>() {}
+    ConjugateGradient(Vector<T> initial) : MultiOptimizer<T, Matrix>(initial) {}
     ConjugateGradient(Vector<T> initial, T eps) : MultiOptimizer<T, Matrix>(initial, eps) {}
 
     std::pair<Vector<T>, T> find(QuadFunction<T, Matrix>& function) override {
@@ -84,6 +87,7 @@ public:
             Vector<T> p_beta = p * beta;
             p = grad_x * (-1) + p_beta;
             if(!this->iter(x, grad_x)) break;
+            if(grad_x.norm() < this->m_eps) break;
         }
         return {x, function(x)};
     }
