@@ -7,6 +7,7 @@
   - `optimizer.hpp`
 - `lab1/` - графический интерфейс
 - `lab1cli/` - интерфейс для работы с методами из командной строки
+Архив со скомпилированной под Windows программой в [релизе](https://github.com/iliayar/MethOpt/releases/tag/1.1.0)
 ## Лаба 2
 Структура:
 - `lib/include/` - методы и интерфейсы к ним
@@ -14,8 +15,6 @@
   - `mutli_methods.hpp`
   - `mutli_optimizer.hpp`
 - `lab2cli/` - интерфейс для работы с методами из командной строки
-
-Архив со скомпилированной под Windows программой в [релизе](https://github.com/iliayar/MethOpt/releases/tag/1.1.0)
 
 ## Сборка под Linux
 - требуется `qt5` и `cmake`
