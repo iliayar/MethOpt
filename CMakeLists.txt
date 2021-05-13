@@ -4,5 +4,6 @@ project(MetOptLab C CXX)
 
 # add_subdirectory(lab1cli)
 # add_subdirectory(lab1)
+add_subdirectory(lab2)
 add_subdirectory(lib)
 add_subdirectory(lab2cli)

@@ -73,16 +73,16 @@ public:
         Vector<T> x = this->get_initial(function.arity());
         Vector<T> grad_x = function.grad(x);
         Vector<T> p = grad_x * (-1);
-        double alpha;
+        T alpha;
 
         for (int i = 0; i < function.arity(); i++) {
-            Vector<T> ap = function.m_A * p; // ??
+            Vector<T> ap = function.m_A * p;
             alpha = (pow(grad_x.norm(), 2)) / (ap * p);
             Vector<T> p_alpha = p * alpha;
             x = x + p_alpha;
             Vector<T> a_p_alpha = ap * alpha;
             Vector<T> curr_grad = grad_x + a_p_alpha;
-            double beta = (pow(curr_grad.norm(), 2)) / (pow(grad_x.norm(), 2));
+            T beta = (pow(curr_grad.norm(), 2)) / (pow(grad_x.norm(), 2));
             grad_x = curr_grad;
             Vector<T> p_beta = p * beta;
             p = grad_x * (-1) + p_beta;

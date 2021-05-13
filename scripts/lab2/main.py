@@ -4,6 +4,7 @@ from common import *
 import matplotlib.pyplot as plt
 import numpy as np
 import random
+from tqdm import tqdm
 
 def get_func(A, b, c):
     A = np.array(A)
@@ -99,19 +100,19 @@ def test(A, b, c, method):
     draw_contours(A, b, c, METHODS[1], level_step=2, grad_step=1)
     draw_contours(A, b, c, METHODS[2], level_step=1, grad_step=1)
 
-def test_counts(n, k, method, N = 2):
-    s = 0
+def test_counts(n, k, method, N = 5):
+    rs = []
     for i in range(N):
         diag = gen_diag(n, k)
         x, f, data_len = read_data(*diag, method, diag = True, no_data = True)
-        s += data_len
-    return s / N
+        rs.append(data_len)
+    return max(rs)
 
 def plot_counts(method, n, K = 200, K_STEP = 10):
-    ks = list(range(1, K, K_STEP))
+    ks = range(1, K, K_STEP)
     counts = []
-    for k in ks:
-        print(f"k = {k}")
+    for k in tqdm(ks):
+        # print(f"k = {k}")
         counts.append(test_counts(n, k, method))
 
     plt.plot(ks, counts, label=('n = ' + str(n)));
@@ -124,7 +125,7 @@ def gen_diag(n, k, l = 1):
         r = random.random() * (L - l) + l
         res.append([0]*i + [r] + [0]*(n - i - 1))
     res.append([0]*(n - 1) + [L])
-    return (res, [1]*n, 0)
+    return (res, [0]*n, 0)
 
 if __name__ == '__main__':
     # A = [[2, -1, 2],
@@ -146,11 +147,11 @@ if __name__ == '__main__':
               [-1, 2]],
              [-10, 2], # b
              0)        # c
-    draw_contours(*first, METHODS[2], level_step=1, delta_step=1, initial=[1.6, -1])
-    # for i in range(1, 5):
-    #     plot_counts(METHODS[0], 10**i, K = 2002, K_STEP=500)
-    # plt.legend()
-    # plt.show()
+    # draw_contours(*first, METHODS[2], level_step=1, delta_step=1, initial=[1.6, -1])
+    for i in range(1, 4):
+        plot_counts(METHODS[2], 10**i, K = 1002, K_STEP=1)
+    plt.legend()
+    plt.show()
     # test(*first)
     # test(*second)
 

@@ -1,1 +1,6 @@
 __pycache__
+
+# latex related
+/**/*.aux
+/**/*.out
+/**/*.log
