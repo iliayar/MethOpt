@@ -27,9 +27,20 @@ public:
         this->swap(std::move(other));
     }
 
-    ProfileMatrix(std::istream& o) {
-        std::cout << "Hello from ProfileMatrix" << std::endl;
-        // TODO
+    ProfileMatrix(std::istream& i) {
+        site_t n; o >> n;
+        std::vector<T> diag(n);
+        for(int i = 0; i < n; ++i) {
+            i >> diag[i];
+        }
+        std::vector<size_t> ia(n + 1);
+        std::vector<size_t> ja(n + 1);
+        for(int i = 0, i < n + 1; ++i) {
+            i >> ia[i];
+        }
+        for(int i = 0; i < n + 1; ++i) {
+            i >> ja[i];
+        }
     }
 
     T& get(size_t i, size_t j) override {
@@ -39,6 +50,13 @@ public:
     }
 
 private:
+
+    ProfileMatrix(std::vector<T>&& diag, std::vector<size_t>&& ia, std::vector<T>&& al, std::vector<T>&& au) {
+        m_diag = std::move(diag);
+        m_ia   = std::move(ia);
+        m_al   = std::move(al);
+        m_au   = std::move(au);
+    }
 
     void swap(ProfileMatrix<T>&& other) {
         std::swap(this->m_diag, other.m_diag);
