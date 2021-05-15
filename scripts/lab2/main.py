@@ -147,10 +147,14 @@ if __name__ == '__main__':
               [-1, 2]],
              [-10, 2], # b
              0)        # c
-    # draw_contours(*first, METHODS[2], level_step=1, delta_step=1, initial=[1.6, -1])
-    for i in range(1, 4):
-        plot_counts(METHODS[2], 10**i, K = 1002, K_STEP=1)
-    plt.legend()
+    third = ([[2, -1], # A
+              [-1, 2]],
+             [0, 0], # b
+             0)        # c
+    draw_contours(*third, METHODS[1], level_step=1, delta_step=1, initial=[1, 1])
+    # for i in range(1, 4):
+    #     plot_counts(METHODS[2], 10**i, K = 1002, K_STEP=1)
+    # plt.legend()
     plt.show()
     # test(*first)
     # test(*second)
