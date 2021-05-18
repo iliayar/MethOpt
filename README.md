@@ -9,6 +9,7 @@
 - `lab1cli/` - интерфейс для работы с методами из командной строки
 Архив со скомпилированной под Windows программой в [релизе](https://github.com/iliayar/MethOpt/releases/tag/1.1.0)
 ## Лаба 2
+[Отчет](scripts/lab2/report.pdf) \
 Структура:
 - `lib/include/` - методы и интерфейсы к ним
   - `mutli_helpers.hpp`
