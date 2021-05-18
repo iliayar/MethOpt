@@ -28,14 +28,18 @@ STEEPEST_METHODS = [
 ]
 
 def steepest_iterations(A, b, c):
+    results = []
     for m in STEEPEST_METHODS:
         x, f, data = read_data(A, b, c, Method.STEEPEST_DESCENT, steepest_method = m)
-        print(m)
+        # print(m)
         counts = []
         for (_, _, [iter_cnt]) in data:
             counts.append(int(iter_cnt))
-        print('Avg:', sum(counts)/len(counts))
-        print('Med:', counts[len(counts)//2])
+        # results.append(sum(counts)/len(counts))
+        results.append(len(data))
+        # print('Avg:', sum(counts)/len(counts))
+        # print('Med:', counts[len(counts)//2])
+    return results
 
 def draw_contours(A, b, c, method, level_step = 1, delta_step = 1, diag = False, initial = None):
     x, f, data = read_data(A, b, c, method, diag = diag, initial = initial)
@@ -127,6 +131,7 @@ def gen_diag(n, k, l = 1):
     res.append([0]*(n - 1) + [L])
     return (res, [0]*n, 0)
 
+
 if __name__ == '__main__':
     # A = [[2, -1, 2],
     #      [-1, 1, -3],
@@ -151,7 +156,16 @@ if __name__ == '__main__':
               [-1, 2]],
              [0, 0], # b
              0)        # c
-    draw_contours(*third, METHODS[1], level_step=1, delta_step=1, initial=[1, 1])
+    for k in range(1, 1000, 100):
+        res = [0]*5
+        for _ in range(3):
+            func = gen_diag(3, k)
+            results = steepest_iterations(*func)
+            res = [a + b for (a, b) in zip(results, res)]
+        res = [a / len(res) for a in res]
+        res = [k] + res
+        print(res)
+    # draw_contours(*third, METHODS[1], level_step=1, delta_step=1, initial=[1, 1])
     # for i in range(1, 4):
     #     plot_counts(METHODS[2], 10**i, K = 1002, K_STEP=1)
     # plt.legend()
