@@ -28,7 +28,7 @@ void generate(std::ostream& out, int k, int n, int dist) {
         int start = ai[i];
         int size = ai[i + 1] - ai[i];
         double xl, xu;
-        while(xl == 0 && xu == 0) {
+        while(xl == 0 || xu == 0) {
             xl = rand(values);
             xu = rand(values);
         }
