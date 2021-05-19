@@ -59,7 +59,27 @@ public:
         this->swap(std::move(other));
     }
 
+    PrimitiveMatrix(Matrix<T> &other_matrix) {
+        size_t n;
+        n = other_matrix.size();
+        data.resize(n);
+        for (int i = 0; i < n; ++i) {
+            data[i].resize(n);
+        }
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                data[i][j] = other_matrix.get(i, j);
+            }
+        }
+    }
+
     PrimitiveMatrix(std::vector<std::vector<T>> matrix_data) : data(std::move(matrix_data)) {}
+
+    void swap_rows(size_t i, size_t j) {
+        if (i != j) {
+            std::swap(data[i], data[j]);
+        }
+    }
 
     T &get(size_t i, size_t j) override {
         return data[i][j];
@@ -305,4 +325,40 @@ private:
     ProfileMatrix<T> m_profile;
     T m_zero = 0;
     T m_one = 1;
+};
+
+template<typename T>
+class L_matrix_proxy : public Matrix<T> {
+public:
+    L_matrix_proxy(LUDecomposition<T> &lu) : lu_base(lu) {
+    }
+
+    T &get(size_t i, size_t j) {
+        return lu_base.getInL(i, j);
+    }
+
+    size_t size() const {
+        return lu_base.size();
+    }
+
+private:
+    LUDecomposition<T> &lu_base;
+};
+
+template<typename T>
+class U_matrix_proxy : public Matrix<T> {
+public:
+    U_matrix_proxy(LUDecomposition<T> &lu) : lu_base(lu) {
+    }
+
+    T &get(size_t i, size_t j) {
+        return lu_base.getInU(i, j);
+    }
+
+    size_t size() const {
+        return lu_base.size();
+    }
+
+private:
+    LUDecomposition<T> &lu_base;
 };
