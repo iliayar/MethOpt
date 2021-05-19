@@ -15,12 +15,14 @@ public:
      * @param i The row number
      * @param j The column number
      */
-    virtual T& get(size_t i, size_t j) = 0;
-    virtual size_t size() = 0;
+    virtual T &get(size_t i, size_t j) = 0;
 
-    friend std::ostream& operator<<(std::ostream& o, Matrix<T>& matrix) {
-        for(int i = 0; i < matrix.size(); ++i) {
-            for(int j = 0; j < matrix.size(); ++j) {
+//    maybe name it square matrix?
+    virtual size_t size() const = 0;
+
+    friend std::ostream &operator<<(std::ostream &o, Matrix<T> &matrix) {
+        for (int i = 0; i < matrix.size(); ++i) {
+            for (int j = 0; j < matrix.size(); ++j) {
                 o << matrix.get(i, j) << " ";
             }
             o << std::endl;
@@ -30,36 +32,118 @@ public:
 };
 
 template<typename T>
-class ProfileMatrix : public Matrix<T> {
+class PrimitiveMatrix : public Matrix<T> {
 public:
-    ProfileMatrix() = delete;
-//    why?
-    ProfileMatrix(ProfileMatrix<T>&) = delete;
-    ProfileMatrix(ProfileMatrix<T>&& other) {
+    PrimitiveMatrix() = delete;
+
+    PrimitiveMatrix(PrimitiveMatrix<T> &other) : data(other.data) {}
+
+    PrimitiveMatrix(PrimitiveMatrix<T> &&other) noexcept {
         this->swap(std::move(other));
     }
 
-    ProfileMatrix(std::istream& in) {
-        size_t n; in >> n;
-        std::vector<T>& diag = m_diag;
+    PrimitiveMatrix(std::vector<std::vector<T>> matrix_data) : data(std::move(matrix_data)) {}
+
+    T &get(size_t i, size_t j) override {
+        return data[i][j];
+    }
+
+    size_t size() const override {
+        return data.size();
+    }
+
+private:
+    void swap(PrimitiveMatrix<T> &&other) {
+        std::swap(this->data, other.data);
+    }
+
+    std::vector<std::vector<T>> data;
+};
+
+template<typename T>
+class ProfileMatrix : public Matrix<T> {
+public:
+    ProfileMatrix() = delete;
+
+    ProfileMatrix(ProfileMatrix<T> &) = delete;
+
+    ProfileMatrix(ProfileMatrix<T> &&other) noexcept {
+        this->swap(std::move(other));
+    }
+
+    ProfileMatrix(Matrix<T> &other_matrix) {
+        size_t n;
+        n = other_matrix.size();
+        std::vector<T> &diag = m_diag;
         diag.resize(n);
-        for(int i = 0; i < n; ++i) {
-            in >> diag[i];
+        for (size_t i = 0; i < n; ++i) {
+            diag[i] = other_matrix.get(i, i);
         }
-        std::vector<size_t>& ia = m_ia;
+        std::vector<size_t> &ia = m_ia;
         ia.resize(n + 1);
-        for(int i = 0; i < n + 1; ++i) {
-            in >> ia[i]; ia[i]--;
+        ia[0] = 0;
+        ia[1] = 0;
+        for (size_t i = 1; i < n; ++i) {
+            size_t not_zeros = i;
+            for (size_t j = 0; j < i; ++j, --not_zeros) {
+                if (other_matrix.get(i, j) == m_zero) {
+                    if (other_matrix.get(j, i) != m_zero) {
+                        throw std::invalid_argument("Given matrix is not profile-symmetrical");
+                    }
+                } else {
+                    if (other_matrix.get(j, i) == m_zero) {
+                        throw std::invalid_argument("Given matrix is not profile-symmetrical");
+                    }
+                    break;
+                }
+            }
+            ia[i + 1] = ia[i] + not_zeros;
         }
         size_t size = ia[n];
-        std::vector<T>& al = m_al;
-        std::vector<T>& au = m_au;
+        std::vector<T> &al = m_al;
+        std::vector<T> &au = m_au;
         al.resize(size);
         au.resize(size);
-        for(int i = 0; i < size; ++i) {
+        size_t al_ind = 0;
+        size_t au_ind = 0;
+        for (size_t i = 0; i < n; ++i) {
+            bool zeros = true;
+            for (size_t j = 0; j < i; ++j) {
+                if (zeros && other_matrix.get(i, j) != m_zero) {
+                    zeros = false;
+                }
+                if (!zeros) {
+                    al[al_ind++] = other_matrix.get(i, j);
+                    au[au_ind++] = other_matrix.get(j, i);
+                }
+            }
+        }
+    }
+
+
+    ProfileMatrix(std::istream &in) {
+        size_t n;
+        in >> n;
+        std::vector<T> &diag = m_diag;
+        diag.resize(n);
+        for (int i = 0; i < n; ++i) {
+            in >> diag[i];
+        }
+        std::vector<size_t> &ia = m_ia;
+        ia.resize(n + 1);
+        for (int i = 0; i < n + 1; ++i) {
+            in >> ia[i];
+            ia[i]--;
+        }
+        size_t size = ia[n];
+        std::vector<T> &al = m_al;
+        std::vector<T> &au = m_au;
+        al.resize(size);
+        au.resize(size);
+        for (int i = 0; i < size; ++i) {
             in >> al[i];
         }
-        for(int i = 0; i < size; ++i) {
+        for (int i = 0; i < size; ++i) {
             in >> au[i];
         }
     }
@@ -69,14 +153,14 @@ public:
      * @param i row
      * @param j column
      */
-    T& get(size_t i, size_t j) override {
+    T &get(size_t i, size_t j) override {
         m_zero = 0;
-        if(i == j) {
+        if (i == j) {
             return m_diag[i];
-        } else if(i > j) {
+        } else if (i > j) {
             int start = m_ia[i];
             int size = m_ia[i + 1] - m_ia[i];
-            if(i - j > size) {
+            if (i - j > size) {
                 return m_zero;
             } else {
                 return m_al[start + (size - i + j)];
@@ -84,16 +168,15 @@ public:
         } else {
             int start = m_ia[j];
             int size = m_ia[j + 1] - m_ia[j];
-            if(j - i > size) {
+            if (j - i > size) {
                 return m_zero;
             } else {
                 return m_au[start + (size - j + i)];
             }
         }
-        return m_zero;
     }
 
-    size_t size() override {
+    size_t size() const override {
         return m_diag.size();
     }
 
@@ -106,7 +189,7 @@ private:
     //     m_au   = std::move(au);
     // }
 
-    void swap(ProfileMatrix<T>&& other) {
+    void swap(ProfileMatrix<T> &&other) {
         std::swap(this->m_diag, other.m_diag);
         std::swap(this->m_ia, other.m_ia);
         std::swap(this->m_al, other.m_al);
@@ -120,16 +203,18 @@ private:
     T m_zero = 0;
 };
 
-template <typename T>
-class LUDecomposition : public Matrix<T> {
+template<typename T>
+class LUDecomposition {
 public:
     LUDecomposition() = delete;
-    LUDecomposition(LUDecomposition<T>&) = delete;
-    LUDecomposition(LUDecomposition<T>&& other) {
+
+    LUDecomposition(LUDecomposition<T> &) = delete;
+
+    LUDecomposition(LUDecomposition<T> &&other) noexcept {
         this->swap(std::move(other));
     }
 
-    LUDecomposition(ProfileMatrix<T>&& profile) : m_profile(std::move(profile)) {
+    LUDecomposition(ProfileMatrix<T> &&profile) : m_profile(std::move(profile)) {
         int n = m_profile.size();
         for (int i = 1; i < n; ++i) {
             for (int j = 0; j < i; ++j) {
@@ -161,14 +246,14 @@ public:
         }
     }
 
-    T& getInL(size_t i, size_t j) {
+    T &getInL(size_t i, size_t j) {
         if (i < j) {
             return m_zero;
         }
         return m_profile.get(i, j);
     }
 
-    T& getInU(size_t i, size_t j) {
+    T &getInU(size_t i, size_t j) {
         if (i > j) {
             return m_zero;
         } else if (i == j) {
@@ -177,20 +262,16 @@ public:
         return m_profile.get(i, j);
     }
 
-    T& get(size_t i, size_t j) override {
-        m_zero = 0;
-        // useless here
-        return m_zero;
-    }
-
-    size_t size() override {
+    size_t size() const {
         return m_profile.size();
     }
+
 private:
 
-    void swap(LUDecomposition<T>&& other) {
+    void swap(LUDecomposition<T> &&other) {
         std::swap(m_profile, other.m_profile);
     }
+
     ProfileMatrix<T> m_profile;
     T m_zero = 0;
     T m_one = 1;
