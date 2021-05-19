@@ -2,8 +2,13 @@
 #include <fire-hpp/fire.hpp>
 #include <iostream>
 #include <fstream>
+#include "generator.hpp"
 
 int fired_main(std::string file = fire::arg({"-f", "--file", "The input file"})) {
+    // std::stringstream ss;
+    // generate(ss, 1, 9, 2);
+    // ProfileMatrix<double> matrix(ss);
+    // std::cout << matrix << std::endl;
     std::ifstream input(file);
     ProfileMatrix<double> matrix(input);
     std::cout << matrix << std::endl;

@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <iostream>
+#include <iomanip>
 
 /*
  * @tparam The numeric type
@@ -39,7 +40,7 @@ public:
     friend std::ostream &operator<<(std::ostream &o, Matrix<T> &matrix) {
         for (int i = 0; i < matrix.size(); ++i) {
             for (int j = 0; j < matrix.size(); ++j) {
-                o << matrix.get(i, j) << " ";
+                o << std::setw(4) <<  matrix.get(i, j) << " ";
             }
             o << std::endl;
         }
