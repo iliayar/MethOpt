@@ -7,14 +7,14 @@ bool test_lu() {
     double upper_bound = 1000;
     std::uniform_real_distribution<double> unif(lower_bound,upper_bound);
     std::default_random_engine re;
-    for (size_t iter = 0; iter < 100; ++iter) {
+    size_t competed = 0;
+    for (size_t iter = 0; iter < 1000; ++iter) {
         size_t size = 1 + rand() % 100;
 
         std::vector<std::vector<double>> raw_matrix(size, std::vector<double>(size));
         for (size_t i = 0; i < size; ++i) {
             for (size_t j = 0; j < size; ++j) {
-                raw_matrix[i][j] = unif(re);
-//                raw_matrix[i][j] = rand() % 4 == 0 ? unif(re) : 0;
+                raw_matrix[i][j] = rand() % 2 == 0 ? unif(re) : 0;
             }
         }
 
@@ -31,16 +31,18 @@ bool test_lu() {
                         double a = lu.getInL(i, k), b = lu.getInU(k, j);
                         lu_result[i][j] += a * b;
                     }
-                    if (abs(lu_result[i][j] - input.get(i, j)) > 1e-10) {
+                    if (std::abs(lu_result[i][j] - input.get(i, j)) > 1e-10) {
                         return false;
                     }
                 }
             }
-//            std::cout << "1 matrix successful\n";
+            std::cout << "[correct]\n";
+            ++competed;
         } catch (std::invalid_argument& e) {
-            std::cout << "1 matrix skipped\n";
+            std::cout << "[asymmetrical matrix skipped]\n";
         }
     }
+    std::cout << "[tested " << competed << " matrices]\n";
     return true;
 }
 
