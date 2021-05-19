@@ -13,9 +13,27 @@ template <typename T>
 T rand(std::vector<T>& v) {
     return v[rand(v.size() - 1)];
 }
+
+void generate_test(std::ostream& out, ProfileMatrix<double>& matrix, int n) {
+    std::vector<double> x(n);
+    for (int i = 0; i < n; ++i) {
+        x[i] = i + 1;
+    }
+    std::vector<double> f = matrix.mul(x);
+    matrix.dump(out);
+    for (double e : f) {
+        out << e << " ";
+    }
+    out << std::endl;
+    for (double e : x) {
+        out << e << " ";
+    }
+    out << std::endl;
+}
+
 }  // namespace
 
-void generate_matrix(std::ostream& out, int k, int n, int dist) {
+void generate_diag_dens(std::ostream& out, int k, int n, int dist) {
     std::vector<double> values = {0, -1, -2, -3, -4};
     std::vector<double> diag(n, 0);
     std::vector<size_t> ai(n + 1);
@@ -65,31 +83,38 @@ void generate_matrix(std::ostream& out, int k, int n, int dist) {
     out << std::endl;
 }
 
-void generate_test(std::ostream& out, int k, int n, int dist) {
-    std::stringstream ss;
-    generate_matrix(ss, k, n, dist);
-    ProfileMatrix<double> matrix(ss);
-    std::vector<double> x(n);
-    for(int i = 0; i < n; ++i) {
-        x[i] = i + 1;
-    }
-    std::vector<double> f = matrix.mul(x);
-    matrix.dump(out);
-    for(double e : f) {
-        out << e << " ";
-    }
-    out << std::endl;
-    for(double e : x) {
-        out << e << " ";
-    }
-    out << std::endl;
-}
-
 void generate_tests(std::string file_prefix, int kmax, int n, int dist) {
     std::srand(std::time(nullptr));
     for (int k = 0; k < kmax; ++k) {
         std::ofstream out(file_prefix + "_" + std::to_string(k));
-        generate_test(out, k, n, dist);
+        std::stringstream ss;
+        generate_diag_dens(ss, k, n, dist);
+        ProfileMatrix<double> matrix(ss);
+        generate_test(out, matrix, n);
         out.close();
     }
+}
+
+void generate_tests_hilbert(std::string file_prefix, int nmax) {
+    std::srand(std::time(nullptr));
+    for (int n = 0; n < nmax; ++n) {
+        std::ofstream out(file_prefix + "_" + std::to_string(n));
+        std::stringstream ss;
+        generate_hilberts(ss, n);
+        ProfileMatrix<double> matrix(ss);
+        generate_test(out, matrix, n);
+        out.close();
+    }
+}
+
+void generate_hilberts(std::ostream& out, int n) {
+    std::vector<std::vector<double>> a(n, std::vector<double>(n, 0));
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            a[i][j] = 1 / (double)(i + j + 1);
+        }
+    }
+    PrimitiveMatrix<double> pmatrix(a);
+    ProfileMatrix<double> matrix(pmatrix);
+    matrix.dump(out);
 }
