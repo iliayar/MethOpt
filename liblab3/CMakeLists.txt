@@ -9,4 +9,5 @@ target_include_directories(liblab3 PUBLIC
 )
 
 include_directories(include)
-include_directories(../lib/include)
+target_link_libraries(liblab3
+  libmetopt)
