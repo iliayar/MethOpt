@@ -44,4 +44,4 @@ int fired_main(std::string file = fire::arg({"-f", "--file", "The input file"}))
     return 0;
 }
 
-FIRE(fired_main)
+FIRE (fired_main)

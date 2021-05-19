@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <iostream>
+#include <iomanip>
 #include "multi_helpers.hpp"
 
 /*
@@ -21,10 +22,26 @@ public:
 //    maybe name it square matrix?
     virtual size_t size() const = 0;
 
-    friend std::ostream &operator<<(std::ostream &o, AbstractMatrix<T> &matrix) {
+    /**
+     * y := Ax
+     * Multiply matrix by vector vector size must be equal to {@link #size()}
+     * @param x The vector mutiply by
+     * @returns y
+     */
+    std::vector<T> mul(std::vector<T> x) {
+        std::vector<T> res(size(), 0);
+        for(int i = 0; i < size(); ++i) {
+            for(int j = 0; j < size(); ++j) {
+                res[i] += x[j] * get(i, j);
+            }
+        }
+        return res;
+    }
+
+    friend std::ostream &operator<<(std::ostream &o, Matrix<T> &matrix) {
         for (int i = 0; i < matrix.size(); ++i) {
             for (int j = 0; j < matrix.size(); ++j) {
-                o << matrix.get(i, j) << " ";
+                o << std::setw(4) <<  matrix.get(i, j) << " ";
             }
             o << std::endl;
         }
@@ -201,14 +218,27 @@ public:
         return m_diag.size();
     }
 
-private:
+    void dump(std::ostream& out) {
+        out << m_diag.size() << std::endl;
+        for(T e : m_diag) {
+            out << e << " ";
+        }
+        out << std::endl;
+        for(size_t i : m_ia) {
+            out << i + 1 << " ";
+        }
+        out << std::endl;
+        for(T e : m_al) {
+            out << e << " ";
+        }
+        out << std::endl;
+        for(T e: m_au) {
+            out << e << " ";
+        }
+        out << std::endl;
+    }
 
-    // ProfileMatrix(std::vector<T>&& m_diag, std::vector<size_t>&& ia, std::vector<T>&& m_al, std::vector<T>&& au) {
-    //     m_diag = std::move(m_diag);
-    //     m_ia   = std::move(ia);
-    //     m_al   = std::move(m_al);
-    //     m_au   = std::move(au);
-    // }
+private:
 
     void swap(ProfileMatrix<T> &&other) {
         std::swap(this->m_diag, other.m_diag);

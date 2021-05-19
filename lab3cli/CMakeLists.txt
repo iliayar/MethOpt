@@ -1,4 +1,3 @@
-file(GLOB Lab3cli_SRCS src/*.cpp)
 file(GLOB Lab3cli_INCL include/*.hpp)
 
 include(FetchContent)
@@ -18,7 +17,11 @@ include_directories(../liblab3/include)
 include_directories(../lib/include)
 
 add_executable(lab3cli
-  ${Lab3cli_SRCS}
+  src/main.cpp
+  ${Lab3cli_INCL})
+
+add_executable(genTests
+  src/genTests.cpp
   ${Lab3cli_INCL})
 
 target_link_libraries(lab3cli
@@ -26,4 +29,7 @@ target_link_libraries(lab3cli
   fire-hpp::fire-hpp
 )
 
-add_executable(matrix_test ../liblab3/src/matrix.cpp)
+target_link_libraries(genTests
+  liblab3
+  fire-hpp::fire-hpp
+)
