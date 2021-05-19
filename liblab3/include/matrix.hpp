@@ -18,6 +18,22 @@ public:
     virtual T& get(size_t i, size_t j) = 0;
     virtual size_t size() = 0;
 
+    /**
+     * y := Ax
+     * Multiply matrix by vector vector size must be equal to {@link #size()}
+     * @param x The vector mutiply by
+     * @returns y
+     */
+    std::vector<T> mul(std::vector<T> x) {
+        std::vector<T> res(size(), 0);
+        for(int i = 0; i < size(); ++i) {
+            for(int j = 0; j < size(); ++j) {
+                res[i] += x[j] + get(i, j);
+            }
+        }
+        return res;
+    }
+
     friend std::ostream& operator<<(std::ostream& o, Matrix<T>& matrix) {
         for(int i = 0; i < matrix.size(); ++i) {
             for(int j = 0; j < matrix.size(); ++j) {
@@ -95,6 +111,22 @@ public:
 
     size_t size() override {
         return m_diag.size();
+    }
+
+    void dump(std::ostream& out) {
+        out << m_diag.size() << std::endl;
+        for(size_t i : m_ia) {
+            out << i + 1 << " ";
+        }
+        out << std::endl;
+        for(T e : m_al) {
+            out << e << " ";
+        }
+        out << std::endl;
+        for(T e: m_au) {
+            out << e << " ";
+        }
+        out << std::endl;
     }
 
 private:
