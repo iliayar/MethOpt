@@ -184,7 +184,7 @@ private:
 };
 
 /**
- * The class to store diag matrix. Stores only main diag.
+ * The class to store m_diag matrix. Stores only main m_diag.
  */
 template <typename T>
 class DiagMatrix {
@@ -235,7 +235,7 @@ private:
  * a number. \(T^{arity} \to T\) Represented by Matrix A, Vector b and constant
  * c: \(f(x) = \frac{1}{2}Ax^2 + bx + c\)
  * @tparam T The type of each element of argument {@link Vector}
- * @tparam Matrix The type of matrix to use. Maybe be common and diag
+ * @tparam Matrix The type of matrix to use. Maybe be common and m_diag
  */
 template <typename T, typename Matrix = Matrix<T>>
 class QuadFunction {

@@ -8,7 +8,7 @@ std::vector<T> gauss_bottom_triangle(LUDecomposition<T> &lu, std::vector<T> &vec
 }
 
 template<typename T>
-std::vector<T> gauss_bottom_triangle(Matrix<T> &lu, std::vector<T> &vec) {
+std::vector<T> gauss_bottom_triangle(AbstractMatrix<T> &lu, std::vector<T> &vec) {
     int size = vec.size();
     std::vector<T> result(size);
     for (int i = 0; i < size; ++i) {
@@ -31,7 +31,7 @@ std::vector<T> gauss_upper_triangle(LUDecomposition<T> &lu, std::vector<T> &vec)
 
 // destroys input vector
 template<typename T>
-std::vector<T> gauss_upper_triangle(Matrix<T> &lu, std::vector<T> &vec) {
+std::vector<T> gauss_upper_triangle(AbstractMatrix<T> &lu, std::vector<T> &vec) {
     int size = vec.size();
     std::vector<T> result(size);
     for (int i = size - 1; i >= 0; --i) {

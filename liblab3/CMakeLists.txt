@@ -9,5 +9,4 @@ target_include_directories(liblab3 PUBLIC
 )
 
 include_directories(include)
-set(SOURCES src/matrix.cpp include/matrix.hpp)
-add_executable(matrix_test src/matrix.cpp)
+include_directories(../lib/include)

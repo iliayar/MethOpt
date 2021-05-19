@@ -14,6 +14,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(COMPILE_OPTS -Wall -Wextra -pedantic -pedantic-errors -std=c++17)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(../liblab3/include)
+include_directories(../lib/include)
 
 add_executable(lab3cli
   ${Lab3cli_SRCS}
@@ -23,3 +25,5 @@ target_link_libraries(lab3cli
   liblab3
   fire-hpp::fire-hpp
 )
+
+add_executable(matrix_test ../liblab3/src/matrix.cpp)

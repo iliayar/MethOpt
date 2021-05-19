@@ -2,12 +2,13 @@
 
 #include <vector>
 #include <iostream>
+#include "multi_helpers.hpp"
 
 /*
  * @tparam The numeric type
  */
 template<typename T>
-class Matrix {
+class AbstractMatrix {
 public:
 
     /*
@@ -20,7 +21,7 @@ public:
 //    maybe name it square matrix?
     virtual size_t size() const = 0;
 
-    friend std::ostream &operator<<(std::ostream &o, Matrix<T> &matrix) {
+    friend std::ostream &operator<<(std::ostream &o, AbstractMatrix<T> &matrix) {
         for (int i = 0; i < matrix.size(); ++i) {
             for (int j = 0; j < matrix.size(); ++j) {
                 o << matrix.get(i, j) << " ";
@@ -32,7 +33,7 @@ public:
 };
 
 template<typename T>
-class PrimitiveMatrix : public Matrix<T> {
+class PrimitiveMatrix : public AbstractMatrix<T> {
 public:
     PrimitiveMatrix() = delete;
 
@@ -42,7 +43,7 @@ public:
         this->swap(std::move(other));
     }
 
-    PrimitiveMatrix(Matrix<T> &other_matrix) {
+    PrimitiveMatrix(AbstractMatrix<T> &other_matrix) {
         size_t n;
         n = other_matrix.size();
         data.resize(n);
@@ -81,7 +82,7 @@ private:
 };
 
 template<typename T>
-class ProfileMatrix : public Matrix<T> {
+class ProfileMatrix : public AbstractMatrix<T> {
 public:
     ProfileMatrix() = delete;
 
@@ -91,7 +92,7 @@ public:
         this->swap(std::move(other));
     }
 
-    ProfileMatrix(Matrix<T> &other_matrix) {
+    ProfileMatrix(AbstractMatrix<T> &other_matrix) {
         size_t n;
         n = other_matrix.size();
         std::vector<T> &diag = m_diag;
@@ -202,10 +203,10 @@ public:
 
 private:
 
-    // ProfileMatrix(std::vector<T>&& diag, std::vector<size_t>&& ia, std::vector<T>&& al, std::vector<T>&& au) {
-    //     m_diag = std::move(diag);
+    // ProfileMatrix(std::vector<T>&& m_diag, std::vector<size_t>&& ia, std::vector<T>&& m_al, std::vector<T>&& au) {
+    //     m_diag = std::move(m_diag);
     //     m_ia   = std::move(ia);
-    //     m_al   = std::move(al);
+    //     m_al   = std::move(m_al);
     //     m_au   = std::move(au);
     // }
 
@@ -298,7 +299,7 @@ private:
 };
 
 template<typename T>
-class L_matrix_proxy : public Matrix<T> {
+class L_matrix_proxy : public AbstractMatrix<T> {
 public:
     L_matrix_proxy(LUDecomposition<T> &lu) : lu_base(lu) {
     }
@@ -316,7 +317,7 @@ private:
 };
 
 template<typename T>
-class U_matrix_proxy : public Matrix<T> {
+class U_matrix_proxy : public AbstractMatrix<T> {
 public:
     U_matrix_proxy(LUDecomposition<T> &lu) : lu_base(lu) {
     }
@@ -331,4 +332,82 @@ public:
 
 private:
     LUDecomposition<T> &lu_base;
+};
+
+template<typename T>
+class SparseMatrix : AbstractMatrix<T> {
+private:
+    std::vector<T> m_diag;
+    std::vector<T> m_al;
+    std::vector<size_t> numbers_of_columns;
+    std::vector<size_t> pos_first_not_zero;
+    T m_zero = 0;
+
+public:
+    SparseMatrix(AbstractMatrix<T>& other_matrix) {
+        size_t n = other_matrix.size();
+        m_diag.resize(n);
+        pos_first_not_zero.resize(n + 1);
+        for (size_t i = 0; i < n; i++) {
+            m_diag[i] = other_matrix.get(i, i);
+        }
+        size_t size = 0;
+        for (size_t i = 0; i < n; i++) {
+            for (size_t j = 0; j < n; j++) {
+                if (other_matrix.get(i, j) != other_matrix.get(j, i)) {
+                    throw std::invalid_argument("Matrix is not symmetrical");
+                }
+            }
+            int pos = -1;
+            for (size_t j = 0; j < n; j++) {
+                if (i == j) {
+                    continue;
+                }
+                if (other_matrix.get(i, j) != m_zero) {
+                    size++;
+                    if (pos == -1) {
+                        pos = m_al.size();
+                    }
+                    m_al.push_back(other_matrix.get(i, j));
+                    numbers_of_columns.push_back(j);
+                }
+            }
+            pos_first_not_zero[i] = pos;
+        }
+        pos_first_not_zero[n] = size;
+    }
+
+    size_t size() const override {
+        return m_diag.size();
+    }
+
+
+    T &get(size_t i, size_t j) override {
+        if (i == j) {
+            return m_diag[i];
+        }
+        if (i < j) {
+            std::swap(i, j);
+        }
+        size_t start = pos_first_not_zero[i];
+        for (size_t k = start; k < pos_first_not_zero[i + 1]; k++) {
+            if (numbers_of_columns[k] == j) {
+                return m_al[k];
+            }
+        }
+        return m_zero;
+    }
+
+    Vector<T> operator*(const Vector<T> &point) {
+        assert(size() == point.size());
+        std::vector<T> res(size());
+        for (size_t i = 0; i < size(); i++) {
+            size_t start = pos_first_not_zero[i];
+            for (size_t j = start; j < pos_first_not_zero[i + 1]; j++) {
+                res[i] += m_al[j] * point.get(numbers_of_columns[j]);
+            }
+            res[i] += m_diag[i] * point.get(i);
+        }
+        return Vector<T>(res);
+    }
 };
