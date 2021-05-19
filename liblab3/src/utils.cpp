@@ -17,3 +17,15 @@ std::vector<double> vec_sub(std::vector<double> a, std::vector<double> b) {
     }
     return res;
 }
+
+std::vector<double> solve(ProfileMatrix<double>&& matrix, std::vector<double> f) {
+    for (double &x : f) {
+        double t;
+        input >> t;
+        x = t;
+    }
+    LUDecomposition<double> lu(std::move(matrix));
+    std::vector<double> t = gauss_bottom_triangle(lu, f);
+    std::vector<double> result = gauss_upper_triangle(lu, t);
+    return result;
+}
