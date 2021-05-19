@@ -31,7 +31,7 @@ public:
         std::vector<T> res(size(), 0);
         for(int i = 0; i < size(); ++i) {
             for(int j = 0; j < size(); ++j) {
-                res[i] += x[j] + get(i, j);
+                res[i] += x[j] * get(i, j);
             }
         }
         return res;
@@ -199,6 +199,10 @@ public:
 
     void dump(std::ostream& out) {
         out << m_diag.size() << std::endl;
+        for(T e : m_diag) {
+            out << e << " ";
+        }
+        out << std::endl;
         for(size_t i : m_ia) {
             out << i + 1 << " ";
         }
@@ -214,13 +218,6 @@ public:
     }
 
 private:
-
-    // ProfileMatrix(std::vector<T>&& diag, std::vector<size_t>&& ia, std::vector<T>&& al, std::vector<T>&& au) {
-    //     m_diag = std::move(diag);
-    //     m_ia   = std::move(ia);
-    //     m_al   = std::move(al);
-    //     m_au   = std::move(au);
-    // }
 
     void swap(ProfileMatrix<T> &&other) {
         std::swap(this->m_diag, other.m_diag);
