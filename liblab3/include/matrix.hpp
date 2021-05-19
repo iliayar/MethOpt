@@ -33,6 +33,7 @@ template<typename T>
 class ProfileMatrix : public Matrix<T> {
 public:
     ProfileMatrix() = delete;
+//    why?
     ProfileMatrix(ProfileMatrix<T>&) = delete;
     ProfileMatrix(ProfileMatrix<T>&& other) {
         this->swap(std::move(other));
@@ -127,7 +128,7 @@ public:
     LUDecomposition(LUDecomposition<T>&& other) {
         this->swap(std::move(other));
     }
-    
+
     LUDecomposition(ProfileMatrix<T>&& profile) : m_profile(std::move(profile)) {
         int n = m_profile.size();
         for (int i = 1; i < n; ++i) {
@@ -152,30 +153,34 @@ public:
             {
 //                    L[i, i]
                 T sum = m_zero;
-                for (int k = 0; k < j; ++k) {
+                for (int k = 0; k < i; ++k) {
                     sum += getInL(i, k) * getInU(k, i);
                 }
                 m_profile.get(i, i) = m_profile.get(i, i) - sum;
             }
         }
-        std::cout << "Hello from LUDecomposition" << std::endl;
-        // TODO
     }
 
-    T& getInL(size_t i, size_t j) override {
+    T& getInL(size_t i, size_t j) {
         if (i < j) {
-            throw std::invalid_argument("L matrix:  i >= j");
+            return m_zero;
         }
         return m_profile.get(i, j);
     }
 
-    T& getInU(size_t i, size_t j) override {
+    T& getInU(size_t i, size_t j) {
         if (i > j) {
-            throw std::invalid_argument("U matrix:  i <= j");
+            return m_zero;
         } else if (i == j) {
             return m_one;
         }
         return m_profile.get(i, j);
+    }
+
+    T& get(size_t i, size_t j) override {
+        m_zero = 0;
+        // useless here
+        return m_zero;
     }
 
     size_t size() override {
