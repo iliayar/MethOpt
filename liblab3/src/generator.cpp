@@ -46,19 +46,12 @@ void generate_diag_dens(std::ostream& out, int k, int n, int dist) {
     for (int i = 0; i < n; ++i) {
         int start = ai[i];
         int size = ai[i + 1] - ai[i];
-        double xl, xu;
+        double x;
         for (int j = 0; j < size; ++j) {
-            xl = rand(values);
+            x = rand(values);
             if (j == 0)
-                while (xl == 0) xl = rand(values);
-            if (xl == 0) {
-                au[start + j] = al[start + j] = 0;
-            } else {
-                xu = rand(values);
-                while (xu == 0) xu = rand(values);
-                au[start + j] = xu;
-                al[start + j] = xl;
-            }
+                while (x == 0) x = rand(values);
+            au[start + j] = al[start + j] = x;
             diag[i] -= al[start + j];
             diag[i - (size - j)] -= au[start + j];
         }
