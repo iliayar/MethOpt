@@ -36,8 +36,8 @@ void generate_test(std::ostream& out, ProfileMatrix<double>& matrix, int n) {
 
 void generate_diag_dens(std::ostream& out, int n, int dist, bool sim) {
     while (true) {
-        // std::vector<double> values = {0, -1, -2, -3, -4};
-        std::vector<double> values = {0, 1, 2, 3, 4};
+        std::vector<double> values = {0, -1, -2, -3, -4};
+        // std::vector<double> values = {0, 1, 2, 3, 4};
         std::vector<double> diag(n, 0);
         std::vector<size_t> ai(n + 1);
         ai[0] = 0;
@@ -64,10 +64,10 @@ void generate_diag_dens(std::ostream& out, int n, int dist, bool sim) {
                         al[start + j] = xl;
                     }
                 }
-                // diag[i] -= al[start + j];
-                // diag[i - (size - j)] -= au[start + j];
-                diag[i] += al[start + j];
-                diag[i - (size - j)] += au[start + j];
+                diag[i] -= al[start + j];
+                diag[i - (size - j)] -= au[start + j];
+                // diag[i] += al[start + j];
+                // diag[i - (size - j)] += au[start + j];
             }
         }
 
