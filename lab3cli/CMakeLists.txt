@@ -1,5 +1,3 @@
-file(GLOB Lab3cli_INCL include/*.hpp)
-
 include(FetchContent)
 FetchContent_Declare(
   fire
@@ -15,12 +13,13 @@ set(COMPILE_OPTS -Wall -Wextra -pedantic -pedantic-errors -std=c++17)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_executable(lab3cli
-  src/main.cpp
-  ${Lab3cli_INCL})
+  src/main.cpp)
 
 add_executable(genTests
-  src/genTests.cpp
-  ${Lab3cli_INCL})
+  src/genTests.cpp)
+
+add_executable(runTests
+  src/runTests.cpp)
 
 target_link_libraries(lab3cli
   liblab3
@@ -29,6 +28,11 @@ target_link_libraries(lab3cli
 )
 
 target_link_libraries(genTests
+  liblab3
+  fire-hpp::fire-hpp
+)
+
+target_link_libraries(runTests
   liblab3
   fire-hpp::fire-hpp
 )

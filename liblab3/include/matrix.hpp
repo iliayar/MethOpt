@@ -6,6 +6,7 @@
 #include "multi_helpers.hpp"
 
 /*
+ * Represents the square matrix
  * @tparam The numeric type
  */
 template<typename T>
@@ -38,7 +39,7 @@ public:
         return res;
     }
 
-    friend std::ostream &operator<<(std::ostream &o, Matrix<T> &matrix) {
+    friend std::ostream &operator<<(std::ostream &o, AbstractMatrix<T> &matrix) {
         for (int i = 0; i < matrix.size(); ++i) {
             for (int j = 0; j < matrix.size(); ++j) {
                 o << std::setw(4) <<  matrix.get(i, j) << " ";
@@ -49,6 +50,10 @@ public:
     }
 };
 
+/**
+ * Class handles the native matrix withut any optimization.
+ * @tparam T numeric type
+ */
 template<typename T>
 class PrimitiveMatrix : public AbstractMatrix<T> {
 public:
@@ -98,6 +103,9 @@ private:
     std::vector<std::vector<T>> data;
 };
 
+/**
+ * Class represent a matrix stored in optimized way using profiles.
+ */
 template<typename T>
 class ProfileMatrix : public AbstractMatrix<T> {
 public:
@@ -254,6 +262,9 @@ private:
     T m_zero = 0;
 };
 
+/**
+ * Class performs the method of LU decomposition.
+ */
 template<typename T>
 class LUDecomposition {
 public:
@@ -365,7 +376,7 @@ private:
 };
 
 template<typename T>
-class SparseMatrix : AbstractMatrix<T> {
+class SparseMatrix : public AbstractMatrix<T> {
 private:
     std::vector<T> m_diag;
     std::vector<T> m_al;

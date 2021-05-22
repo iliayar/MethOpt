@@ -1,35 +1,10 @@
 #include "matrix.hpp"
 
-// destroys input vector
-template<typename T>
-std::vector<T> gauss_bottom_triangle(LUDecomposition<T> &lu, std::vector<T> &vec) {
-    auto temp = L_matrix_proxy<T>(lu);
-    return gauss_bottom_triangle(temp, vec);
-}
-
-template<typename T>
-std::vector<T> gauss_bottom_triangle(AbstractMatrix<T> &lu, std::vector<T> &vec) {
-    int size = vec.size();
-    std::vector<T> result(size);
-    for (int i = 0; i < size; ++i) {
-        for (int j = i + 1; j < size; ++j) {
-            T c = lu.get(j, i) / lu.get(i, i);
-            vec[j] = vec[j] - c * vec[i];
-//            lu.get(j, i) = 0;
-        }
-        result[i] = vec[i] / lu.get(i, i);
-    }
-    return result;
-}
-
-// destroys input vector
-template<typename T>
-std::vector<T> gauss_upper_triangle(LUDecomposition<T> &lu, std::vector<T> &vec) {
-    auto temp = U_matrix_proxy<T>(lu);
-    return gauss_upper_triangle(temp, vec);
-}
-
-// destroys input vector
+/**
+ * Solve the equation y = Ux, i.e perform the reverse Gaussian. destroys input vector
+ * @param lu The upper triangle matrix in LU decomposition
+ * @param vec The x vector in the equation
+ */
 template<typename T>
 std::vector<T> gauss_upper_triangle(AbstractMatrix<T> &lu, std::vector<T> &vec) {
     int size = vec.size();
@@ -39,13 +14,54 @@ std::vector<T> gauss_upper_triangle(AbstractMatrix<T> &lu, std::vector<T> &vec) 
 //            in lu always 1 but here we working with an unspecified matrix
             T c = lu.get(j, i) / lu.get(i, i);
             vec[j] = vec[j] - c * vec[i];
-//            lu.get(j, i) = 0;
         }
         result[i] = vec[i] / lu.get(i, i);
     }
     return result;
 }
 
+/**
+ * Solve the equation Ly = b, i.e perform direct Gaussian. destroys input vector
+ * @param lu The left triangle matrice in LU decomposition
+ * @prama vec The b vector in equiation
+ */
+template<typename T>
+std::vector<T> gauss_bottom_triangle(AbstractMatrix<T> &lu, std::vector<T> &vec) {
+    int size = vec.size();
+    std::vector<T> result(size);
+    for (int i = 0; i < size; ++i) {
+        for (int j = i + 1; j < size; ++j) {
+            T c = lu.get(j, i) / lu.get(i, i);
+            vec[j] = vec[j] - c * vec[i];
+        }
+        result[i] = vec[i] / lu.get(i, i);
+    }
+    return result;
+}
+
+/**
+ * Helper funtion for {@link #gauss_upper_triangle(AbstractMatrix<T>&, std::vector<T>&)}
+ */
+template<typename T>
+std::vector<T> gauss_upper_triangle(LUDecomposition<T> &lu, std::vector<T> &vec) {
+    auto temp = U_matrix_proxy<T>(lu);
+    return gauss_upper_triangle(temp, vec);
+}
+
+/**
+ * Helper funtion for {@link #gauss_bottom_triangle(AbstractMatrix<T>&, std::vector<T>&)}
+ */
+template<typename T>
+std::vector<T> gauss_bottom_triangle(LUDecomposition<T> &lu, std::vector<T> &vec) {
+    auto temp = L_matrix_proxy<T>(lu);
+    return gauss_bottom_triangle(temp, vec);
+}
+
+/**
+ * Solve the system using Gausse method with choice of main element.
+ * @param matrix The matrix in natural form
+ * @param vec The b vector in equition Ax = b
+ */
 template<typename T>
 std::vector<T> gauss_main_element(PrimitiveMatrix<T> &matrix, std::vector<T> &vec) {
     int size = vec.size();
@@ -64,7 +80,6 @@ std::vector<T> gauss_main_element(PrimitiveMatrix<T> &matrix, std::vector<T> &ve
         for (int j = i + 1; j < size; ++j) {
             T c = matrix.get(j, i) / matrix.get(i, i);
             vec[j] = vec[j] - c * vec[i];
-//            matrix.get(j, i) = 0;
             for (int k = i + 1; k < size; ++k) {
                 matrix.get(j, k) = matrix.get(j, k) - c * matrix.get(i, k);
             }

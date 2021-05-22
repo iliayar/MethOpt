@@ -15,7 +15,9 @@ int fired_main(std::string file = fire::arg({"-f", "--file", "The input file"}))
         double t;
         input >> t;
         x = t;
+        // std::cout << x << " ";
     }
+    // std::cout << std::endl << matrix << std::endl;
     auto wrapped_input_vector = Vector<double>(input_vector);
     std::vector<double> input_vector_copy = input_vector;
     LUDecomposition<double> lu(std::move(matrix));

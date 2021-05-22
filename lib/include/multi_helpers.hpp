@@ -99,6 +99,8 @@ public:
 
     int size() const { return m_components.size(); }
 
+    std::vector<T> toStdVector() { return m_components; }
+
 protected:
     std::vector<T> m_components;
 };

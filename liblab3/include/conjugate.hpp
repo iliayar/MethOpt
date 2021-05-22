@@ -1,5 +1,8 @@
 #include "matrix.hpp"
 
+/**
+ * Conjugate gradient method for finding soltion for linear quations system
+ */
 class ConjugateMethod {
     static constexpr double eps = 1e-7;
     static constexpr int MAX_ITER = 1e6;
