@@ -64,8 +64,10 @@ void generate_diag_dens(std::ostream& out, int n, int dist, bool sim) {
                         al[start + j] = xl;
                     }
                 }
-                diag[i] -= al[start + j];
-                diag[i - (size - j)] -= au[start + j];
+                // diag[i] -= al[start + j];
+                // diag[i - (size - j)] -= au[start + j];
+                diag[i] += al[start + j];
+                diag[i - (size - j)] += au[start + j];
             }
         }
 

@@ -8,7 +8,7 @@ class ConjugateMethod {
     static constexpr int MAX_ITER = 1e6;
 
 public:
-    static Vector<double> find(SparseMatrix<double> &a, Vector<double> &b) {
+    static std::pair<Vector<double>, int> find(SparseMatrix<double> &a, Vector<double> &b) {
         auto x = b;
         auto r = b - (a * x);
         auto z = r;
@@ -28,6 +28,6 @@ public:
             r = curr_r;
             z = r + z * beta;
         }
-        return x;
+        return {x, i};
     }
 };

@@ -39,7 +39,7 @@ int fired_main(std::string file = fire::arg({"-f", "--file", "The input file"}))
     std::cout << "System of linear equations solution with Conjugate Method"
               << std::endl;
 
-    auto answer = ConjugateMethod::find(sparse_matrix, wrapped_input_vector);
+    auto [answer, _] = ConjugateMethod::find(sparse_matrix, wrapped_input_vector);
     for (int i = 0; i < answer.size(); ++i) {
         std::cout << answer.get(i) << ' ';
     }

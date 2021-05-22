@@ -11,6 +11,7 @@ int tests_main(std::string file = fire::arg({"-f", "--file", "file prefix"})
     if(hilberts) {
         std::ifstream in(file + "_n" + std::to_string(n));
         run_test(in, std::cout);
+        std::cout << std::endl;
         in.close();
     } else {
         run_tests(file, kmax, n);
