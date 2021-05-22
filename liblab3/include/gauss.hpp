@@ -10,9 +10,11 @@
 template <typename T>
 std::vector<T> gauss_upper_triangle(AbstractMatrix<T> &lu,
                                     std::vector<T> &vec) {
-    //    computing complexity (muls & divs): sum i = 1 to n (2i + 1) =
-    //    = n + 2 * (1 + n) * n / 2 =
-    //    = n ^ 2 + 2n;
+    //    computing complexity (muls & divs):
+    //    sum i = 1 to n (sum j = 1 to i - 1 (2) + 1) =
+    //    sum i = 1 to n (2i + 1) =
+    //    n + 2 * (1 + n) * n / 2 =
+    //    n ^ 2 + 2n;
     //    [assuming lu specification] = (n ^ 2 + 3n) / 2
     int size = vec.size();
     std::vector<T> result(size);
@@ -75,7 +77,8 @@ std::vector<T> gauss_bottom_triangle(LUDecomposition<T> &lu,
 }
 
 /**
- * Solve the system using Gauss method with choice of main element.
+ * Solves the l. eq. system using Gauss method's modification with choice of
+ * main element.
  * @param matrix The matrix in natural form
  * @param vec The b vector in the equation Ax = b
  */
@@ -83,10 +86,10 @@ template <typename T>
 std::vector<T> gauss_main_element(PrimitiveMatrix<T> &matrix,
                                   std::vector<T> &vec) {
     //    computing complexity:
-    //    sum i = 1 to n (sum j = i + 2 to n (2 + sum k = i + 2 to n (1))) =
-    //    sum i = 1 to n (sum j = i + 2 to n (2 + n - i - 2) =
-    //    sum i = 1 to n (sum j = i + 2 to n (n - i) =
-    //    n * (2 - 3 n + n ^ 2) / 3
+    //    sum i = 1 to n (sum j = i + 1 to n (2 + sum k = i + 1 to n (1))) =
+    //    sum i = 1 to n (sum j = i + 1 to n (2 + n - i - 1) =
+    //    sum i = 1 to n (sum j = i + 1 to n (n - i - 1) =
+    //    n * (n ^ 2 - 3n + 2) / 3
     int size = vec.size();
     for (int i = 0; i < size; ++i) {
         int max_el_row = i;
