@@ -280,7 +280,6 @@ public:
 //        computing complexity:
 //        sum i = 2 to n (sum j = 1 to i - 1 (2 * sum k = 1 to j - 1 (1)) + sum k = 1 to i - 1 (1)) =
 //        sum i = 2 to n (sum j = 1 to i - 1 (2j) + i) =
-//        sum i = 2 to n (sum j = 1 to i - 1 (2j) + i) =
 //        sum i = 2 to n ((i - 1) * i + i) =
 //        sum i = 2 to n (i ^ 2) =
 //        n ^ 3 / 3 + n ^ 2 /2 + n / 6 - 1
