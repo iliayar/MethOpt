@@ -31,8 +31,8 @@ public:
      */
     std::vector<T> mul(std::vector<T> x) {
         std::vector<T> res(size(), 0);
-        for(int i = 0; i < size(); ++i) {
-            for(int j = 0; j < size(); ++j) {
+        for (int i = 0; i < size(); ++i) {
+            for (int j = 0; j < size(); ++j) {
                 res[i] += x[j] * get(i, j);
             }
         }
@@ -42,7 +42,7 @@ public:
     friend std::ostream &operator<<(std::ostream &o, AbstractMatrix<T> &matrix) {
         for (int i = 0; i < matrix.size(); ++i) {
             for (int j = 0; j < matrix.size(); ++j) {
-                o << std::setw(4) <<  matrix.get(i, j) << " ";
+                o << std::setw(4) << matrix.get(i, j) << " ";
             }
             o << std::endl;
         }
@@ -226,21 +226,21 @@ public:
         return m_diag.size();
     }
 
-    void dump(std::ostream& out) {
+    void dump(std::ostream &out) {
         out << m_diag.size() << std::endl;
-        for(T e : m_diag) {
+        for (T e : m_diag) {
             out << e << " ";
         }
         out << std::endl;
-        for(size_t i : m_ia) {
+        for (size_t i : m_ia) {
             out << i + 1 << " ";
         }
         out << std::endl;
-        for(T e : m_al) {
+        for (T e : m_al) {
             out << e << " ";
         }
         out << std::endl;
-        for(T e: m_au) {
+        for (T e: m_au) {
             out << e << " ";
         }
         out << std::endl;
@@ -280,8 +280,9 @@ public:
 //        computing complexity:
 //        sum i = 2 to n (sum j = 1 to i - 1 (2 * sum k = 1 to j - 1 (1)) + sum k = 1 to i - 1 (1)) =
 //        sum i = 2 to n (sum j = 1 to i - 1 (2j) + i) =
-//        sum i = 2 to n (sum j = 1 to i - 1 (2j) + i) =
-//        (2 * n ^ 3 + 3 * n ^ 2 + n - 6) / 6
+//        sum i = 2 to n ((i - 1) * i + i) =
+//        sum i = 2 to n (i ^ 2) =
+//        n ^ 3 / 3 + n ^ 2 /2 + n / 6 - 1
         int n = m_profile.size();
         for (int i = 1; i < n; ++i) {
             for (int j = 0; j < i; ++j) {
@@ -390,7 +391,7 @@ private:
     T m_zero = 0;
 
 public:
-    SparseMatrix(AbstractMatrix<T>& other_matrix) {
+    SparseMatrix(AbstractMatrix<T> &other_matrix) {
         size_t n = other_matrix.size();
         m_diag.resize(n);
         pos_first_not_zero.resize(n + 1);
