@@ -7,7 +7,7 @@
  * @param lu The upper triangle matrix in LU decomposition
  * @param vec The x vector in the equation
  */
-template <typename T>
+template<typename T>
 std::vector<T> gauss_upper_triangle(AbstractMatrix<T> &lu,
                                     std::vector<T> &vec) {
     //    computing complexity (muls & divs):
@@ -37,10 +37,11 @@ std::vector<T> gauss_upper_triangle(AbstractMatrix<T> &lu,
  * @param lu The left triangle matrice in LU decomposition
  * @prama vec The b vector in equiation
  */
-template <typename T>
+template<typename T>
 std::vector<T> gauss_bottom_triangle(AbstractMatrix<T> &lu,
                                      std::vector<T> &vec) {
-    //    computing complexity: n ^ 2 + 2n (calculations are the same as above)
+    //    computing complexity:
+    //    sum i = 1 to n (1 + sum j = i + 1 to n (2)) = n ^ 2
     int size = vec.size();
     std::vector<T> result(size);
     //    method is simplified
@@ -58,7 +59,7 @@ std::vector<T> gauss_bottom_triangle(AbstractMatrix<T> &lu,
  * Helper function for {@link #gauss_upper_triangle(AbstractMatrix<T>&,
  * std::vector<T>&)}
  */
-template <typename T>
+template<typename T>
 std::vector<T> gauss_upper_triangle(LUDecomposition<T> &lu,
                                     std::vector<T> &vec) {
     auto temp = U_matrix_proxy<T>(lu);
@@ -69,7 +70,7 @@ std::vector<T> gauss_upper_triangle(LUDecomposition<T> &lu,
  * Helper function for {@link #gauss_bottom_triangle(AbstractMatrix<T>&,
  * std::vector<T>&)}
  */
-template <typename T>
+template<typename T>
 std::vector<T> gauss_bottom_triangle(LUDecomposition<T> &lu,
                                      std::vector<T> &vec) {
     auto temp = L_matrix_proxy<T>(lu);
@@ -82,14 +83,15 @@ std::vector<T> gauss_bottom_triangle(LUDecomposition<T> &lu,
  * @param matrix The matrix in natural form
  * @param vec The b vector in the equation Ax = b
  */
-template <typename T>
+template<typename T>
 std::vector<T> gauss_main_element(PrimitiveMatrix<T> &matrix,
                                   std::vector<T> &vec) {
     //    computing complexity:
-    //    sum i = 1 to n (sum j = i + 1 to n (2 + sum k = i + 1 to n (1))) =
-    //    sum i = 1 to n (sum j = i + 1 to n (2 + n - i - 1) =
-    //    sum i = 1 to n (sum j = i + 1 to n (n - i - 1) =
-    //    n * (n ^ 2 - 3n + 2) / 3
+    //    sum i = 1 to n (sum j = i + 1 to n (2 + sum k = i + 1 to n (1))) + n ^ 2 + 2n =
+    //    sum i = 1 to n (sum j = i + 1 to n (2 + n - i)) + n ^ 2 + 2n =
+    //    sum i = 1 to n ((n - i) * (2 + n - i)) + n ^ 2 + 2n =
+    //    n * (2 * n ^ 2 + 3n - 5) / 6 + n ^ 2 + 2n =
+    //    n ^ 3 / 3 + 3 * n ^ 2 / 2 + 7 * n / 6
     int size = vec.size();
     for (int i = 0; i < size; ++i) {
         int max_el_row = i;
