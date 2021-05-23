@@ -52,15 +52,15 @@ int run_test(std::istream& in, std::ostream& out) {
     for(double& e : x_true) {
         in >> e;
     }
-    // std::vector<double> x = solve(std::move(matrix), f);
+    std::vector<double> x = solve(std::move(matrix), f);
     // std::vector<double> x = solve_main_element(std::move(matrix), f);
-    std::vector<double> x = solve_conjugate(std::move(matrix), f);
+    // std::vector<double> x = solve_conjugate(std::move(matrix), f);
     double error = vec_norm(vec_sub(x, x_true));
     double rel_error = error / vec_norm(x_true);
-    double nevyazka = vec_norm(vec_sub(f, matrix.mul(x)));
-    double cond = error * vec_norm(f) / vec_norm(x_true) / nevyazka;
-    out << error << " " << rel_error << " " << cond;
-    // out << error << " " << rel_error;
+    // double nevyazka = vec_norm(vec_sub(f, matrix.mul(x)));
+    // double cond = error * vec_norm(f) / vec_norm(x_true) / nevyazka;
+    // out << error << " " << rel_error << " " << cond;
+    out << error << " " << rel_error;
     return size;
 }
 

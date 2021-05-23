@@ -108,9 +108,10 @@ void generate_tests(std::string file_prefix, int kmax, int n, int dist, bool sim
     for (int k = 0; k < kmax; ++k) {
         std::ofstream out(file_prefix + "_k" + std::to_string(k) + "_n" + std::to_string(n));
         out << std::setprecision(18);
+        double prev = matrix.get(0, 0);
         matrix.get(0, 0) += pow(10.0, -k);
         generate_test(out, matrix, n);
-        matrix.get(0, 0) -= pow(10.0, -k);
+        matrix.get(0, 0) = prev;
         out.close();
     }
 }
