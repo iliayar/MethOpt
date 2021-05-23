@@ -16,7 +16,11 @@
   - `mutli_methods.hpp`
   - `mutli_optimizer.hpp`
 - `lab2cli/` - интерфейс для работы с методами из командной строки
-
+## Лаба 3
+[Отчет](scripts/lab3/report.pdf) \
+Структура:
+- `liblab3/` - Реализация методов и матриц
+- `lab3cli/` - интерфейс для работы с методами из командной строки
 ## Сборка под Linux
 - требуется `qt5` и `cmake`
 - `git clone https://github.com/iliayar/MethOpt`
