@@ -1,4 +1,5 @@
-#include "../../lib/include/multi_methods.hpp"
+#pragma once
+#include "multi_methods.hpp"
 
 template <typename T>
 struct multivariate_function {
