@@ -10,4 +10,5 @@ target_include_directories(liblab4 PUBLIC
 
 include_directories(include)
 target_link_libraries(liblab4
+  liblab3
   libmetopt)

@@ -1,7 +1,7 @@
 #pragma once
 #include "multi_methods.hpp"
 #include "multi_helpers.hpp"
-#include "../../liblab3/include/gauss.hpp"
+#include "gauss.hpp"
 
 template <typename T>
 class multivariate_function {
