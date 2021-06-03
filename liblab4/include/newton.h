@@ -5,35 +5,33 @@
 
 template <typename T>
 class multivariate_function {
+public:
+//    copy - it should be changeable
+    virtual Vector<T> get_grad(Vector<T> vector) const = 0;
 
 //    copy - it should be changeable
-    virtual Vector<T> get_grad(Vector<T> vector);
+    virtual Matrix<T> get_hessian(Vector<T> vector) const = 0;
 
-//    copy - it should be changeable
-    virtual Matrix<T> get_hessian(Vector<T> vector);
-
-    virtual T call(Vector<T> args);
+    virtual T call(Vector<T> args) const = 0;
 };
 
 template <typename T>
 class quad_multivariate_function : public multivariate_function<T> {
 public:
 
-    explicit quad_multivariate_function(QuadFunction<T> function) {
-        this->function = function;
-    }
+    explicit quad_multivariate_function(QuadFunction<T> function) :function(std::move(function)) {}
 
 //    copy - it should be changeable
-    Vector<T> get_grad(Vector<T> vector) override {
+    Vector<T> get_grad(Vector<T> vector) const override {
         return function.grad(vector);
     }
 
 //    copy - it should be changeable
-    Matrix<T> get_hessian(Vector<T> vector) override {
+    Matrix<T> get_hessian(Vector<T> vector) const override {
         return function.m_A;
     }
 
-    T call(Vector<T> args) override {
+    T call(Vector<T> args) const override {
         return function.call(args);
     }
 
@@ -50,17 +48,19 @@ struct newton_ordinary {
     virtual std::pair<Vector<T>, T> find(const multivariate_function<T>& func, const Vector<T>& init_point, const T eps) {
 
         Vector<T> x = init_point;
-        Vector<T> p;
+        Vector<T> p(init_point.size());
 
         while (true) {
             auto curr_grad = func.get_grad(x);
             PrimitiveMatrix<T> matrix = PrimitiveMatrix<T>(func.get_hessian(x));
-            p = gauss_main_element(matrix, curr_grad * -1);
+            Vector<T> t = (curr_grad * -1);
+            auto tt  = t.toStdVector();
+            p = gauss_main_element(matrix, tt);
             x = x + p;
             if (p.norm() < eps) break;
         }
 
-        return x;
+        return {x, func.call(x)};
     }
 
 //    bool iter(IterData i) {

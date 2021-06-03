@@ -61,6 +61,20 @@ public:
 
     PrimitiveMatrix(PrimitiveMatrix<T> &other) : data(other.data) {}
 
+    PrimitiveMatrix(Matrix<T> other_matrix) {
+        size_t n;
+        n = other_matrix.size();
+        data.resize(n);
+        for (int i = 0; i < n; ++i) {
+            data[i].resize(n);
+        }
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                data[i][j] = other_matrix[i][j];
+            }
+        }
+    }
+
     PrimitiveMatrix(PrimitiveMatrix<T> &&other) noexcept {
         this->swap(std::move(other));
     }

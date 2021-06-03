@@ -249,7 +249,7 @@ public:
      * Call that function with giving arguments as {@link Vector}
      * @param The arguments
      */
-    T call(Vector<T> args) {
+    T call(Vector<T> args) const {
         return (m_A * args) * args * static_cast<T>(0.5) + m_b * args + m_c;
     }
 
@@ -257,7 +257,7 @@ public:
      * Calculate gradient in giving point
      * @param args point
      */
-    Vector<T> grad(Vector<T> args) { return (m_A * args) + m_b; }
+    Vector<T> grad(Vector<T> args) const { return (m_A * args) + m_b; }
 
     /**
      * Creates a single argument function: \(\alpha - \nabla f(\alpha) * x\)
