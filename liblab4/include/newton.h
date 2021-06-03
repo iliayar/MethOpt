@@ -1,4 +1,5 @@
 #pragma once
+
 #include "multi_methods.hpp"
 #include "multi_helpers.hpp"
 #include "gauss.hpp"
@@ -82,7 +83,7 @@ private:
 };
 
 //template <typename T, typename IterData>
-template<typename T>
+template<typename T, template <typename> class Method = BrentMethod>
 struct newton_with_search {
     const int MAX_ITERATIONS = 1e+6;
 
@@ -98,7 +99,7 @@ struct newton_with_search {
             auto tt = t.toStdVector();
             p = gauss_main_element(matrix, tt);
             Function<T>* func_double = func.to_single(x, p);
-            BrentMethod<T> method = BrentMethod<T>(func_double, 0, 10, eps);
+            BrentMethod<T> method = Method<T>(func_double, 0, 10, eps);
             auto alpha = get_min(method).first;
             x = x + p * alpha;
             if (p.norm() < eps) break;
@@ -119,7 +120,7 @@ private:
 };
 
 //template <typename T, typename IterData>
-template<typename T>
+template<typename T, template <typename> class Method = BrentMethod>
 struct newton_with_descent {
     const int MAX_ITERATIONS = 1e+6;
 
@@ -141,7 +142,7 @@ struct newton_with_descent {
                 p = curr_grad * -1;
             }
             Function<T>* func_double = func.to_single(x, p);
-            BrentMethod<T> method = BrentMethod<T>(func_double, 0, 10, eps);
+            BrentMethod<T> method = Method<T>(func_double, 0, 10, eps);
             auto alpha = get_min(method).first;
             x = x + p * alpha;
             first = false;

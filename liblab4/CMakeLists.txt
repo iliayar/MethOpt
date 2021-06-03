@@ -14,3 +14,7 @@ target_link_libraries(liblab4
   libmetopt)
 
 add_executable(test4 src/newton.cpp)
+target_link_libraries(test4
+  liblab4
+  liblab3
+  libmetopt)
