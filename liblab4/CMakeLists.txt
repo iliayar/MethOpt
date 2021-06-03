@@ -12,3 +12,5 @@ include_directories(include)
 target_link_libraries(liblab4
   liblab3
   libmetopt)
+
+add_executable(test4 src/newton.cpp)
