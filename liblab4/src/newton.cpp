@@ -2,8 +2,11 @@
 #include "quazi.h"
 
 int main() {
-    lab4::newton_with_search<double> method;
-    // lab4::dummy_quazi<double> method;
+    // lab4::newton_with_descent<double> method;
+    // lab4::newton_ordinary<double> method;
+    // lab4::newton_with_search<double> method;
+    // lab4::bfs_method<double> method;
+    lab4::powell_method<double> method;
     std::vector<Vector<double>> v = {
             Vector<double>({2,  -1, 2}),
             Vector<double>({-1, 1, -3}),

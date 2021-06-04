@@ -29,14 +29,14 @@ public:
      * @param x The vector mutiply by
      * @returns y
      */
-    std::vector<T> mul(std::vector<T> x) {
+    Vector<T> mul(Vector<T> x) {
         std::vector<T> res(size(), 0);
         for (int i = 0; i < size(); ++i) {
             for (int j = 0; j < size(); ++j) {
                 res[i] += x[j] * get(i, j);
             }
         }
-        return res;
+        return Vector<T>(res);
     }
 
     friend std::ostream &operator<<(std::ostream &o, AbstractMatrix<T> &matrix) {
@@ -112,14 +112,6 @@ public:
 
     size_t size() const override {
         return data.size();
-    }
-
-    static PrimitiveMatrix<T> I(size_t n) {
-        std::vector<std::vector<T>> matrix(n, std::vector<T>(n, 0));
-        for(int i = 0; i < n; ++i) {
-            matrix[i][i] = 1;
-        }
-        return PrimitiveMatrix<T>(matrix);
     }
 
 private:

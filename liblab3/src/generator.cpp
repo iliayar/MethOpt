@@ -16,19 +16,17 @@ T rand(std::vector<T>& v) {
 }
 
 void generate_test(std::ostream& out, ProfileMatrix<double>& matrix, int n) {
-    std::vector<double> x(n);
+    Vector<double> x(n);
     for (int i = 0; i < n; ++i) {
         x[i] = i + 1;
     }
-    std::vector<double> f = matrix.mul(x);
+    std::vector<double> f = matrix.mul(x).toStdVector();
     matrix.dump(out);
     for (double e : f) {
         out << e << " ";
     }
     out << std::endl;
-    for (double e : x) {
-        out << e << " ";
-    }
+    out << x;
     out << std::endl;
 }
 

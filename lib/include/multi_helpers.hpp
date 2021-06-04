@@ -54,8 +54,7 @@ public:
      * Multiply each component of vector by constant value
      * @param c constant value
      */
-    template <typename C>
-    Vector<T> operator*(C c) const {
+    Vector<T> operator*(T c) const {
         Vector<T> res = *this;
         for (int i = 0; i < m_components.size(); ++i) {
             res[i] = res[i] * c;
@@ -147,6 +146,16 @@ public:
         return res;
     }
 
+    Matrix<T> operator*(T value) const {
+        Vector<Vector<T>> matrix(size(), Vector<T>(size(), 0));
+        for(int i = 0; i < size(); ++i) {
+            for(int j = 0; j < size(); ++j) {
+                matrix[i][j] = get(i)[j] * value;
+            }
+        }
+        return Matrix<T>(matrix);
+    }
+
     /**
      * Perform multiplication of matrix by vector, which one is represents as
      * matrix with shape {@code (1, width)}
@@ -161,6 +170,10 @@ public:
     Matrix<T> operator+(const Matrix<T>& other) const {
         return Matrix<T>(m_matrix + other.m_matrix);
     }
+    
+    Matrix<T> operator-(const Matrix<T>& other) const {
+        return *this + (other * (-1));
+    }
 
     friend std::ostream& operator<<(std::ostream& o, Matrix<T> m) {
         int height = m.size();
@@ -172,6 +185,14 @@ public:
             o << std::endl;
         }
         return o;
+    }
+
+    static Matrix<T> I(size_t n) {
+        Vector<Vector<T>> matrix(n, Vector<T>(n, 0));
+        for(int i = 0; i < n; ++i) {
+            matrix[i][i] = 1;
+        }
+        return Matrix<T>(matrix);
     }
 
     Vector<T>& get(int i) { return m_matrix[i]; }
