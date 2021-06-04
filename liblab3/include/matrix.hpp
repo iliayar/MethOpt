@@ -95,6 +95,11 @@ public:
 
     PrimitiveMatrix(std::vector<std::vector<T>> matrix_data) : data(std::move(matrix_data)) {}
 
+    PrimitiveMatrix<T>& operator=(PrimitiveMatrix<T>&& other) {
+        this->swap(std::move(other));
+        return *this;
+    }
+
     void swap_rows(size_t i, size_t j) {
         if (i != j) {
             std::swap(data[i], data[j]);
@@ -107,6 +112,16 @@ public:
 
     size_t size() const override {
         return data.size();
+    }
+
+    static PrimitiveMatrix<T> I(size_t n) {
+        std::vector<std::vector<T>> matrix(n, std::vector<T>(n, 0));
+        for(int i = 0; i < n; ++i) {
+            for(int j = 0; j < n; ++j) {
+                matrix[i][j] = 1;
+            }
+        }
+        return PrimitiveMatrix<T>(matrix);
     }
 
 private:
