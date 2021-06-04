@@ -117,9 +117,7 @@ public:
     static PrimitiveMatrix<T> I(size_t n) {
         std::vector<std::vector<T>> matrix(n, std::vector<T>(n, 0));
         for(int i = 0; i < n; ++i) {
-            for(int j = 0; j < n; ++j) {
-                matrix[i][j] = 1;
-            }
+            matrix[i][i] = 1;
         }
         return PrimitiveMatrix<T>(matrix);
     }

@@ -32,16 +32,17 @@ struct abstract_quazi_method : public optimizer<T> {
         PrimitiveMatrix<T> G = PrimitiveMatrix<T>::I(init_point.size());
 
         while (true) {
+            x = x1;
             Vector<T> w1 = func.get_grad(x) * -1;
             Vector<T> delta_w = w1 - w;
+            w = w1;
             G = std::move(update(G, delta_x, delta_w));
             p = G.mul(w.toStdVector());
             alpha = get_alpha(func, x, p, eps);
-            x = x1 + p * alpha;
-            delta_x = x - x1;
-            if (x.norm() < eps) break;
+            x1 = x + p * alpha;
+            delta_x = x1 - x;
+            if (delta_x.norm() < eps) break;
             if (!this->iter({})) break;
-            std::swap(x, x1);
         }
 
         return {x, func.call(x)};

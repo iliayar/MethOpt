@@ -18,7 +18,7 @@ struct iter_data {
  */
 template <typename T>
 struct optimizer {
-    const int MAX_ITERATIONS = 1e+4;
+    const int MAX_ITERATIONS = 1e+6;
 
     /**
      * Finds the minimum of function, started from initial point
