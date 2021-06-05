@@ -28,9 +28,7 @@ struct marquardt_method : public optimizer<T> {
             T fy;
             Vector<T> p(x.size(), 0);
             while(true) {
-                PrimitiveMatrix<T> matrix = H + I * tau;
-                std::vector<T> r = grad_x.toStdVector();
-                p = gauss_main_element(matrix, r);
+                p = solve(H + I * tau, grad_x);
                 y = x + p;
                 fy = func.call(y);
                 tau = tau / beta;
@@ -62,9 +60,7 @@ struct marquardt_method_cholesky : public optimizer<T> {
             while (!check_cholesky(H + I * tau)) {
                 tau = std::max(1.0, 2.0 * tau);
             }
-            PrimitiveMatrix<T> matrix = H + I * tau;
-            std::vector<T> r = grad_x.toStdVector();
-            Vector<T> p = gauss_main_element(matrix, r);
+            Vector<T> p = solve(H + I * tau, grad_x);
             x = x + p;
             fx = func.call(x);
             if(!this->iter({})) break;

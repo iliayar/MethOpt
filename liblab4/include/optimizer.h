@@ -1,6 +1,7 @@
 #pragma once
 
 #include "helpers.h"
+#include "gauss.hpp"
 
 namespace lab4 {
 
@@ -51,5 +52,30 @@ struct optimizer {
 private:
     std::vector<iter_data<T>> m_data;
 };
+
+template <typename T, template <typename> class Method>
+T min_alpha(const multivariate_function<T>& func, const Vector<T> x,
+            const Vector<T> p, T eps) {
+    Method<T> method(func.to_single(x, p), 0, 10, eps);
+    return get_min(method).first;
+}
+
+template <typename T>
+Vector<T> solve(PrimitiveMatrix<T>&& matrix, Vector<T>& vector) {
+    PrimitiveMatrix<T> tm = std::move(matrix);
+    std::vector<T> tv = vector.toStdVector();
+    std::vector<T> sol = gauss_main_element(tm, tv);
+    return Vector<T>(sol);
+}
+
+template <typename T>
+Vector<T> solve(Matrix<T>& matrix, Vector<T>& vector) {
+    return solve(PrimitiveMatrix<T>(matrix), vector);
+}
+
+template <typename T>
+Vector<T> solve(Matrix<T> matrix, Vector<T>& vector) {
+    return solve(PrimitiveMatrix<T>(matrix), vector);
+}
 
 }  // namespace lab4

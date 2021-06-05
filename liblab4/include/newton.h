@@ -17,10 +17,8 @@ struct newton_ordinary : public optimizer<T> {
 
         while (true) {
             auto curr_grad = func.get_grad(x);
-            PrimitiveMatrix<T> matrix = PrimitiveMatrix<T>(func.get_hessian(x));
             Vector<T> t = (curr_grad * -1);
-            std::vector<T> tt = t.toStdVector();
-            p = gauss_main_element(matrix, tt);
+            p = solve(func.get_hessian(x), t);
             x = x + p;
             if (p.norm() < eps) break;
             if (!this->iter({})) break;  // TODO
@@ -40,13 +38,9 @@ struct newton_with_search : public optimizer<T> {
 
         while (true) {
             auto curr_grad = func.get_grad(x);
-            PrimitiveMatrix<T> matrix = PrimitiveMatrix<T>(func.get_hessian(x));
             Vector<T> t = curr_grad * -1;
-            auto tt = t.toStdVector();
-            p = gauss_main_element(matrix, tt);
-            Function<T>* func_double = func.to_single(x, p);
-            BrentMethod<T> method = Method<T>(func_double, 0, 10, eps);
-            auto alpha = get_min(method).first;
+            p = solve(func.get_hessian(x), t);
+            auto alpha = min_alpha<T, Method>(func, x, p, eps);
             x = x + p * alpha;
             if (p.norm() < eps) break;
             if (!this->iter({})) break;  // TODO
@@ -68,17 +62,13 @@ struct newton_with_descent : public optimizer<T> {
 
         while (true) {
             auto curr_grad = func.get_grad(x);
-            PrimitiveMatrix<T> matrix = PrimitiveMatrix<T>(func.get_hessian(x));
             Vector<T> t = curr_grad * -1;
-            auto tt = t.toStdVector();
-            p = gauss_main_element(matrix, tt);
+            p = solve(func.get_hessian(x), t);
 
             if (p * curr_grad > 0 || first) {
                 p = curr_grad * -1;
             }
-            Function<T>* func_double = func.to_single(x, p);
-            BrentMethod<T> method = Method<T>(func_double, 0, 10, eps);
-            auto alpha = get_min(method).first;
+            auto alpha = min_alpha<T, Method>(func, x, p, eps);
             x = x + p * alpha;
             first = false;
             if (p.norm() < eps) break;

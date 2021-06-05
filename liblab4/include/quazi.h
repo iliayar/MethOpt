@@ -26,7 +26,7 @@ struct abstract_quazi_method : public optimizer<T> {
         Vector<T> x = init_point;
         Vector<T> w = func.get_grad(x) * -1;
         Vector<T> p = w;
-        T alpha = get_alpha(func, x, p, eps);
+        T alpha = min_alpha<T, Method>(func, x, p, eps);
         Vector<T> x1 = x + p * alpha;
         Vector<T> delta_x = x1 - x;
         Matrix<T> G = Matrix<T>::I(init_point.size());
@@ -38,8 +38,7 @@ struct abstract_quazi_method : public optimizer<T> {
             w = w1;
             G = std::move(update(G, delta_x, delta_w));
             p = G * w;
-            alpha = get_alpha(func, x, p, eps);
-            // std::cout << p << "|" << alpha << std::endl;
+            alpha = min_alpha<T, Method>(func, x, p, eps);
             x1 = x + p * alpha;
             delta_x = x1 - x;
             if (delta_x.norm() < eps) break;
@@ -47,12 +46,6 @@ struct abstract_quazi_method : public optimizer<T> {
         }
 
         return {x1, func.call(x1)};
-    }
-
-    T get_alpha(const multivariate_function<T>& func, const Vector<T> x,
-                const Vector<T> p, T eps) {
-        Method<T> method(func.to_single(x, p), 0, 10, eps);
-        return get_min(method).first;
     }
 
     /**
