@@ -42,47 +42,62 @@ void test(lab4::multivariate_function<double>& function, Vector<double>& init, d
     }
 }
 
-#define QUAD_FUNC(name, A, b, c)                           \
-    auto name() {                                          \
-        std::vector<std::vector<double>> tv A;             \
-        Vector<double> vect b;                             \
-        Matrix<double> matrix = std_vector_to_matrix(tv);  \
-        lab4::quad_multivariate_function<double> function( \
-            QuadFunction<double>(matrix, vect, c));        \
-        return function;                                   \
-    }
+lab4::multivariate_function<double>* new_quad_func(std::vector<std::vector<double>> A, std::vector<double> b, double c) {
+    Vector<double> vect(b);
+    Matrix<double> matrix = std_vector_to_matrix(A);
+    return new lab4::quad_multivariate_function<double>(
+        QuadFunction<double>(matrix, vect, c));
+}
 
-#define FUNC(name, F, G, H)                                              \
-    class name : public lab4::multivariate_function<double> {            \
-        virtual Vector<double> get_grad(Vector<double> point) const {    \
-            double x = point[0];                                         \
-            double y = point[1];                                         \
-            std::vector<double> r G;                                     \
-            return Vector<double>(r);                                    \
-        }                                                                \
-        virtual Matrix<double> get_hessian(Vector<double> point) const { \
-            double x = point[0];                                         \
-            double y = point[1];                                         \
-            std::vector<std::vector<double>> r H;                        \
-            return std_vector_to_matrix(r);                              \
-        }                                                                \
-        virtual double call(Vector<double> args) const {                 \
-            double x = args[0];                                          \
-            double y = args[1];                                          \
-            return F;                                                    \
-        }                                                                \
-    };
-QUAD_FUNC(function1,
-          ({{2, -1}, {-1, 1}}) , ({2, -3}) , 10);
-FUNC(function2, 2 * x * x + y * y + x * x * y, ({4 * x + 2 * x * y, 6 * y + x * x}), ({{2 * y + 4, 2 * x}, {2 * x, 6}}))
-#undef QUAD_FUNC
-#undef FUNC
+class ordinary_function : public lab4::multivariate_function<double> {
+public:
+    ordinary_function(
+        std::function<double(double, double)> F,
+        std::function<std::vector<double>(double, double)> G,
+        std::function<std::vector<std::vector<double>>(double, double)> H)
+        : m_F(F), m_G(G), m_H(H) {}
+
+    virtual Vector<double> get_grad(Vector<double> point) const {
+        double x = point[0];
+        double y = point[1];
+        return Vector<double>(m_G(x, y));
+    }
+    virtual Matrix<double> get_hessian(Vector<double> point) const {
+        double x = point[0];
+        double y = point[1];
+        return std_vector_to_matrix(m_H(x, y));
+    }
+    virtual double call(Vector<double> args) const {
+        double x = args[0];
+        double y = args[1];
+        return m_F(x, y);
+    }
+private:
+    std::function<double (double, double)> m_F;
+    std::function<std::vector<double> (double, double)> m_G;
+    std::function<std::vector<std::vector<double>> (double, double)> m_H;
+};
 
 int fired_main(
-    std::string method = fire::arg({"-m", "--method", "The method to use"}),
-    std::string init_str = fire::arg({"-i", "--init", "The initial vector"}),
-    double eps = fire::arg({"-e", "--eps", "precision"}, 1e-4)) {
-    auto function = function2();
+    std::string method = fire::arg({"-m", "--method", "method to use"}),
+    std::string init_str = fire::arg({"-i", "--init", "initial vector"}),
+    double eps = fire::arg({"-e", "--eps", "precision"}, 1e-4),
+    int f = fire::arg({"-f", "--function", "function number: 1, 2, ..."})) {
+    std::vector<lab4::multivariate_function<double>*> functions;
+
+    functions.push_back(new_quad_func({{2, -1}, {-1, 1}}, {2, -3}, 10));
+    functions.push_back(new ordinary_function(
+        [](double x, double y) -> double {
+            return 2 * x * x + y * y + x * x * y;
+        },
+        [](double x, double y) -> std::vector<double> {
+            return {4 * x + 2 * x * y, 6 * y + x * x};
+        },
+        [](double x, double y) -> std::vector<std::vector<double>> {
+            return {{2 * y + 4, 2 * x}, {2 * x, 6}};
+        }));
+
+    auto& function = *functions[f - 1];
     auto init = read_init(init_str);
     if(method == "marquardt") {
         test<lab4::marquardt_method>(function, init, eps);
