@@ -85,17 +85,7 @@ int fired_main(
     int f = fire::arg({"-f", "--function", "function number: 1, 2, ..."})) {
     std::vector<lab4::multivariate_function<double>*> functions;
 
-    functions.push_back(new_quad_func({{2, -1}, {-1, 1}}, {2, -3}, 10));
-    functions.push_back(new ordinary_function(
-        [](double x, double y) -> double {
-            return 2 * x * x + y * y + x * x * y;
-        },
-        [](double x, double y) -> std::vector<double> {
-            return {4 * x + 2 * x * y, 6 * y + x * x};
-        },
-        [](double x, double y) -> std::vector<std::vector<double>> {
-            return {{2 * y + 4, 2 * x}, {2 * x, 6}};
-        }));
+    #include "functions.inl"
 
     auto& function = *functions[f - 1];
     auto init = read_init(init_str);

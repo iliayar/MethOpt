@@ -41,7 +41,7 @@ struct abstract_quazi_method : public optimizer<T> {
             alpha = min_alpha<T, Method>(func, x, p, eps);
             x1 = x + p * alpha;
             delta_x = x1 - x;
-            if (!this->iter({x})) break;
+            if (!this->iter({x1})) break;
             if (delta_x.norm() < eps) break;
         }
 

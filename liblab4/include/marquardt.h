@@ -27,7 +27,6 @@ struct marquardt_method : public optimizer<T> {
             T p_norm;
             while(true) {
                 Vector<T> p = solve(H + I * tau, grad_x);
-                if(!check_solution(p)) return {x, fx}; // FIXME
                 Vector<T> y = x + p;
                 T fy = func.call(y);
                 if(fy <= fx) {
@@ -63,7 +62,6 @@ struct marquardt_method_cholesky : public optimizer<T> {
                 tau = std::max(1.0, 2.0 * tau);
             }
             Vector<T> p = solve(H + I * tau, grad_x);
-            if(!check_solution(p)) break; // FIXME
             x = x + p;
             fx = func.call(x);
             if(!this->iter({x})) break;

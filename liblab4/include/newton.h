@@ -19,7 +19,6 @@ struct newton_ordinary : public optimizer<T> {
             auto curr_grad = func.get_grad(x);
             Vector<T> t = (curr_grad * -1);
             p = solve(func.get_hessian(x), t);
-            if(!check_solution(p)) break; // FIXME
             x = x + p;
             if (!this->iter({x})) break;
             if (p.norm() < eps) break;
@@ -41,7 +40,6 @@ struct newton_with_search : public optimizer<T> {
             auto curr_grad = func.get_grad(x);
             Vector<T> t = curr_grad * -1;
             p = solve(func.get_hessian(x), t);
-            if(!check_solution(p)) break; // FIXME
             auto alpha = min_alpha<T, Method>(func, x, p, eps);
             x = x + p * alpha;
             if (!this->iter({x})) break;
@@ -66,7 +64,6 @@ struct newton_with_descent : public optimizer<T> {
             auto curr_grad = func.get_grad(x);
             Vector<T> t = curr_grad * -1;
             p = solve(func.get_hessian(x), t);
-            if(!check_solution(p)) break; // FIXME
 
             if (p * curr_grad > 0 || first) {
                 p = curr_grad * -1;
