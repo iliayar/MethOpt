@@ -4,3 +4,5 @@ __pycache__
 /**/*.aux
 /**/*.out
 /**/*.log
+
+.ipynb_checkpoints

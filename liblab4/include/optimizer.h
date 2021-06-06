@@ -1,7 +1,8 @@
 #pragma once
 
-#include "helpers.h"
+#include "function.h"
 #include "gauss.hpp"
+#include <iostream>
 
 namespace lab4 {
 
@@ -11,7 +12,13 @@ template <typename T>
  * The struct to log data from each iteration of method
  */
 struct iter_data {
-    // TODO
+    
+    friend std::ostream& operator<<(std::ostream& o, iter_data<T>& data) {
+        o << data.x << std::endl;
+        return o;
+    }
+
+    Vector<T> x;
 };
 
 /**
@@ -19,7 +26,7 @@ struct iter_data {
  */
 template <typename T>
 struct optimizer {
-    const int MAX_ITERATIONS = 1e+6;
+    const int MAX_ITERATIONS = 1e+3;
 
     /**
      * Finds the minimum of function, started from initial point
@@ -76,6 +83,14 @@ Vector<T> solve(Matrix<T>& matrix, Vector<T>& vector) {
 template <typename T>
 Vector<T> solve(Matrix<T> matrix, Vector<T>& vector) {
     return solve(PrimitiveMatrix<T>(matrix), vector);
+}
+
+template <typename T>
+bool check_solution(Vector<T> p) {
+    for (int i = 0; i < p.size(); ++i) {
+        if (isnanf(p[i]) || isinff(p[i])) return false;
+    }
+    return true;
 }
 
 }  // namespace lab4

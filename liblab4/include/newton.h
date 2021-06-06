@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gauss.hpp"
-#include "helpers.h"
+#include "function.h"
 #include "multi_methods.hpp"
 #include "optimizer.h"
 
@@ -19,9 +19,10 @@ struct newton_ordinary : public optimizer<T> {
             auto curr_grad = func.get_grad(x);
             Vector<T> t = (curr_grad * -1);
             p = solve(func.get_hessian(x), t);
+            if(!check_solution(p)) break; // FIXME
             x = x + p;
+            if (!this->iter({x})) break;
             if (p.norm() < eps) break;
-            if (!this->iter({})) break;  // TODO
         }
 
         return {x, func.call(x)};
@@ -40,10 +41,11 @@ struct newton_with_search : public optimizer<T> {
             auto curr_grad = func.get_grad(x);
             Vector<T> t = curr_grad * -1;
             p = solve(func.get_hessian(x), t);
+            if(!check_solution(p)) break; // FIXME
             auto alpha = min_alpha<T, Method>(func, x, p, eps);
             x = x + p * alpha;
-            if (p.norm() < eps) break;
-            if (!this->iter({})) break;  // TODO
+            if (!this->iter({x})) break;
+            if ((p * alpha).norm() < eps) break;
         }
 
         return {x, func.call(x)};
@@ -64,6 +66,7 @@ struct newton_with_descent : public optimizer<T> {
             auto curr_grad = func.get_grad(x);
             Vector<T> t = curr_grad * -1;
             p = solve(func.get_hessian(x), t);
+            if(!check_solution(p)) break; // FIXME
 
             if (p * curr_grad > 0 || first) {
                 p = curr_grad * -1;
@@ -71,8 +74,8 @@ struct newton_with_descent : public optimizer<T> {
             auto alpha = min_alpha<T, Method>(func, x, p, eps);
             x = x + p * alpha;
             first = false;
+            if (!this->iter({x})) break;
             if (p.norm() < eps) break;
-            if (!this->iter({})) break;  // TODO
         }
 
         return {x, func.call(x)};

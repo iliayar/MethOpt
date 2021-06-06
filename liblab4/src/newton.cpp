@@ -21,7 +21,7 @@ int main() {
     Matrix<double> matrix = Matrix<double>(Vector<Vector<double>>(v));
     lab4::quad_multivariate_function<double> function(QuadFunction<double>(matrix, vect, 10));
     double prec = 1e-4;
-    Vector<double> init = {3, 4, 2};
+    Vector<double> init = {-1, -1, -1};
     test<lab4::marquardt_method>("Marquardt", function, init, prec);
     test<lab4::marquardt_method_cholesky>("Marquardt with Cholesky decomposition", function, init, prec);
     test<lab4::powell_method>("Powell", function, init, prec);

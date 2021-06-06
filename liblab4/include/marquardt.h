@@ -13,8 +13,8 @@ struct marquardt_method : public optimizer<T> {
     virtual std::pair<Vector<T>, T> find(const multivariate_function<T>& func,
                                          const Vector<T>& init_point,
                                          const T eps) override {
-        T tau0 = 1 / eps;
-        T beta = 1.0 / 2;
+        T tau0 = 1.0;
+        T beta = 1.0 / 2.0;
 
         Vector<T> x = init_point;
         T fx = func.call(x);
@@ -24,21 +24,23 @@ struct marquardt_method : public optimizer<T> {
             Vector<T> grad_x = func.get_grad(x) * (-1);
             Matrix<T> H = func.get_hessian(x);
             T tau = tau0;
-            Vector<T> y = x;
-            T fy;
-            Vector<T> p(x.size(), 0);
+            T p_norm;
             while(true) {
-                p = solve(H + I * tau, grad_x);
-                y = x + p;
-                fy = func.call(y);
-                tau = tau / beta;
-                if(fy <= fx) break;
+                Vector<T> p = solve(H + I * tau, grad_x);
+                if(!check_solution(p)) return {x, fx}; // FIXME
+                Vector<T> y = x + p;
+                T fy = func.call(y);
+                if(fy <= fx) {
+                    x = y;
+                    fx = fy;
+                    p_norm = p.norm();
+                    break;
+                }
+                tau /= beta;
             }
-            x = y;
-            fx = fy;
             tau0 = tau0 * beta;
-            if(!this->iter({})) break;
-            if(p.norm() < eps) break;
+            if(!this->iter({x})) break;
+            if(p_norm <= eps) break;
         }
         return {x, fx};
     }
@@ -61,9 +63,10 @@ struct marquardt_method_cholesky : public optimizer<T> {
                 tau = std::max(1.0, 2.0 * tau);
             }
             Vector<T> p = solve(H + I * tau, grad_x);
+            if(!check_solution(p)) break; // FIXME
             x = x + p;
             fx = func.call(x);
-            if(!this->iter({})) break;
+            if(!this->iter({x})) break;
             if(p.norm() < eps) break;
         }
         return {x, fx};
@@ -74,6 +77,7 @@ struct marquardt_method_cholesky : public optimizer<T> {
         Vector<Vector<T>> L(n, Vector<T>(n, 0));
         L[0][0] = sqrt(A[0][0]);
         for(int i = 1; i < n; ++i) {
+            if(L[0][0] == 0) return false;
             L[i][0] = A[i][0] / L[0][0];
         }
         for(int i = 1; i < n; ++i) {
@@ -82,7 +86,7 @@ struct marquardt_method_cholesky : public optimizer<T> {
                 sum += L[i][j]*L[i][j];
             }
             if (A[i][i] - sum < 0) return false;
-            L[i][i] = sqrt(L[i][i] - sum);
+            L[i][i] = sqrt(A[i][i] - sum);
         }
         for(int i = 1; i < n - 1; ++i) {
             for(int j = i + 1; j < n; ++j) {
@@ -90,6 +94,7 @@ struct marquardt_method_cholesky : public optimizer<T> {
                 for(int p = 0; p < i; ++p) {
                     sum += L[i][p] * L[j][p];
                 }
+                if(L[i][i] == 0) return false;
                 L[i][j] = (A[j][i] - sum) / L[i][i];
             }
         }
