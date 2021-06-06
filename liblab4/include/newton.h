@@ -15,6 +15,8 @@ struct newton_ordinary : public optimizer<T> {
         Vector<T> x = init_point;
         Vector<T> p(init_point.size());
 
+        this->iter({x});
+
         while (true) {
             auto curr_grad = func.get_grad(x);
             Vector<T> t = (curr_grad * -1);
@@ -24,7 +26,7 @@ struct newton_ordinary : public optimizer<T> {
             if (p.norm() < eps) break;
         }
 
-        return {x, func.call(x)};
+        return this->iter_last(func);
     }
 };
 
@@ -36,17 +38,19 @@ struct newton_with_search : public optimizer<T> {
         Vector<T> x = init_point;
         Vector<T> p(init_point.size());
 
+        this->iter({x});
+
         while (true) {
             auto curr_grad = func.get_grad(x);
             Vector<T> t = curr_grad * -1;
             p = solve(func.get_hessian(x), t);
             auto alpha = min_alpha<T, Method>(func, x, p, eps);
             x = x + p * alpha;
-            if (!this->iter({x})) break;
+            if (!this->iter({x, alpha})) break;
             if ((p * alpha).norm() < eps) break;
         }
 
-        return {x, func.call(x)};
+        return this->iter_last(func);
     }
 };
 
@@ -60,6 +64,8 @@ struct newton_with_descent : public optimizer<T> {
 
         bool first = true;
 
+        this->iter({x});
+
         while (true) {
             auto curr_grad = func.get_grad(x);
             Vector<T> t = curr_grad * -1;
@@ -71,11 +77,11 @@ struct newton_with_descent : public optimizer<T> {
             auto alpha = min_alpha<T, Method>(func, x, p, eps);
             x = x + p * alpha;
             first = false;
-            if (!this->iter({x})) break;
+            if (!this->iter({x, alpha})) break;
             if (p.norm() < eps) break;
         }
 
-        return {x, func.call(x)};
+        return this->iter_last(func);
     }
 };
 }  // namespace lab4

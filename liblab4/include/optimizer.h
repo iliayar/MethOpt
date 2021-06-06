@@ -4,6 +4,9 @@
 #include "gauss.hpp"
 #include "utils.hpp"
 #include <iostream>
+#include <experimental/optional>
+
+using std::experimental::optional;
 
 namespace lab4 {
 
@@ -15,6 +18,9 @@ struct iter_data {
     
     friend std::ostream& operator<<(std::ostream& o, iter_data<T>& data) {
         o << data.x << std::endl;
+        o << "[ ";
+        if(data.alpha) o << data.alpha.value();
+        o << " ]" << std::endl;;
         return o;
     }
 
@@ -26,6 +32,7 @@ struct iter_data {
     }
 
     Vector<T> x;
+    optional<T> alpha;
 };
 
 /**
@@ -59,6 +66,11 @@ struct optimizer {
         return true;
     }
 
+    std::pair<Vector<T>, T> iter_last(const multivariate_function<T>& func) {
+        Vector<T> x = m_data[m_data.size() - 1].x;
+        return {x, func.call(x)};
+    }
+
     /**
      * Get the data from all iterations
      */
@@ -71,7 +83,7 @@ private:
 template <typename T, template <typename> class Method>
 T min_alpha(const multivariate_function<T>& func, const Vector<T> x,
             const Vector<T> p, T eps) {
-    Method<T> method(func.to_single(x, p), -2, 2, eps);
+    Method<T> method(func.to_single(x, p), -10, 10, eps);
     return get_min(method).first;
 }
 

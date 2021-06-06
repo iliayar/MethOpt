@@ -52,30 +52,24 @@ lab4::multivariate_function<double>* new_quad_func(std::vector<std::vector<doubl
 class ordinary_function : public lab4::multivariate_function<double> {
 public:
     ordinary_function(
-        std::function<double(double, double)> F,
-        std::function<std::vector<double>(double, double)> G,
-        std::function<std::vector<std::vector<double>>(double, double)> H)
+        std::function<double(Vector<double>)> F,
+        std::function<std::vector<double>(Vector<double>)> G,
+        std::function<std::vector<std::vector<double>>(Vector<double>)> H)
         : m_F(F), m_G(G), m_H(H) {}
 
-    virtual Vector<double> get_grad(Vector<double> point) const {
-        double x = point[0];
-        double y = point[1];
-        return Vector<double>(m_G(x, y));
+    virtual Vector<double> get_grad(Vector<double> args) const {
+        return Vector<double>(m_G(args));
     }
-    virtual Matrix<double> get_hessian(Vector<double> point) const {
-        double x = point[0];
-        double y = point[1];
-        return std_vector_to_matrix(m_H(x, y));
+    virtual Matrix<double> get_hessian(Vector<double> args) const {
+        return std_vector_to_matrix(m_H(args));
     }
     virtual double call(Vector<double> args) const {
-        double x = args[0];
-        double y = args[1];
-        return m_F(x, y);
+        return m_F(args);
     }
 private:
-    std::function<double (double, double)> m_F;
-    std::function<std::vector<double> (double, double)> m_G;
-    std::function<std::vector<std::vector<double>> (double, double)> m_H;
+    std::function<double (Vector<double>)> m_F;
+    std::function<std::vector<double> (Vector<double>)> m_G;
+    std::function<std::vector<std::vector<double>> (Vector<double>)> m_H;
 };
 
 int fired_main(

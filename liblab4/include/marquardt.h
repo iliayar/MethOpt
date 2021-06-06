@@ -19,6 +19,8 @@ struct marquardt_method : public optimizer<T> {
         Vector<T> x = init_point;
         T fx = func.call(x);
         Matrix<T> I = Matrix<T>::I(init_point.size());
+
+        this->iter({x});
         
         while(true) {
             Vector<T> grad_x = func.get_grad(x) * (-1);
@@ -41,7 +43,7 @@ struct marquardt_method : public optimizer<T> {
             if(!this->iter({x})) break;
             if(p_norm <= eps) break;
         }
-        return {x, fx};
+        return this->iter_last(func);
     }
 };
     
@@ -53,6 +55,8 @@ struct marquardt_method_cholesky : public optimizer<T> {
         Vector<T> x = init_point;
         T fx = func.call(x);
         Matrix<T> I = Matrix<T>::I(init_point.size());
+
+        this->iter({x});
         
         while(true) {
             Vector<T> grad_x = func.get_grad(x) * (-1);
@@ -67,7 +71,7 @@ struct marquardt_method_cholesky : public optimizer<T> {
             if(!this->iter({x})) break;
             if(p.norm() < eps) break;
         }
-        return {x, fx};
+        return this->iter_last(func);
     }
 
     bool check_cholesky(Matrix<T> A) {

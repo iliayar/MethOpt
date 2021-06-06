@@ -31,6 +31,9 @@ struct abstract_quazi_method : public optimizer<T> {
         Vector<T> delta_x = x1 - x;
         Matrix<T> G = Matrix<T>::I(init_point.size());
 
+        this->iter({x});
+        this->iter({x1});
+            
         while (true) {
             x = x1;
             Vector<T> w1 = func.get_grad(x) * -1;
@@ -41,11 +44,11 @@ struct abstract_quazi_method : public optimizer<T> {
             alpha = min_alpha<T, Method>(func, x, p, eps);
             x1 = x + p * alpha;
             delta_x = x1 - x;
-            if (!this->iter({x1})) break;
+            if (!this->iter({x1, alpha})) break;
             if (delta_x.norm() < eps) break;
         }
 
-        return {x1, func.call(x1)};
+        return this->iter_last(func);
     }
 
     /**
