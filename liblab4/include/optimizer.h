@@ -66,6 +66,10 @@ struct optimizer {
         return true;
     }
 
+    /**
+     * Returns pair of last written point data with {@link
+     * #iter(iter_data<T>)} and function value in this point
+     */
     std::pair<Vector<T>, T> iter_last(const multivariate_function<T>& func) {
         Vector<T> x = m_data[m_data.size() - 1].x;
         return {x, func.call(x)};
@@ -80,6 +84,10 @@ private:
     std::vector<iter_data<T>> m_data;
 };
 
+/**
+ * Find the alpha paramater for function f(alpha) = x + alpha * p
+ * using the one dimensional optimization method.
+ */
 template <typename T, template <typename> class Method>
 T min_alpha(const multivariate_function<T>& func, const Vector<T> x,
             const Vector<T> p, T eps) {
@@ -87,6 +95,9 @@ T min_alpha(const multivariate_function<T>& func, const Vector<T> x,
     return get_min(method).first;
 }
 
+/**
+ * Solve the equation matrix * x = p for x
+ */
 template <typename T>
 Vector<T> solve(PrimitiveMatrix<T>&& matrix, Vector<T>& vector) {
     PrimitiveMatrix<T> tm = std::move(matrix);

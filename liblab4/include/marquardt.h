@@ -8,6 +8,9 @@
 
 namespace lab4 {
 
+/**
+ * Implementation of Marquardt method to find minimum of multivariate function
+ */
 template <typename T, template <typename> class Method = BrentMethod>
 struct marquardt_method : public optimizer<T> {
     virtual std::pair<Vector<T>, T> find(const multivariate_function<T>& func,
@@ -47,6 +50,11 @@ struct marquardt_method : public optimizer<T> {
     }
 };
     
+/**
+ * Implementation of Marquardt method to find minimum of multivariate
+ * function using the Cholesky decomposition to determine the tau
+ * parameter for equation (G + tau*I)*x = p
+ */
 template <typename T, template <typename> class Method = BrentMethod>
 struct marquardt_method_cholesky : public optimizer<T> {
     virtual std::pair<Vector<T>, T> find(const multivariate_function<T>& func,

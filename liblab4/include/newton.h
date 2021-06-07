@@ -7,6 +7,9 @@
 
 namespace lab4 {
 
+/**
+ * Implementation of Newton method without modifiactions
+ */
 template <typename T>
 struct newton_ordinary : public optimizer<T> {
     virtual std::pair<Vector<T>, T> find(const multivariate_function<T>& func,
@@ -30,6 +33,10 @@ struct newton_ordinary : public optimizer<T> {
     }
 };
 
+/**
+ * Implementation of Newton method with one dimensional search to find
+ * the alpha paramter of direction
+ */
 template <typename T, template <typename> class Method = BrentMethod>
 struct newton_with_search : public optimizer<T> {
     virtual std::pair<Vector<T>, T> find(const multivariate_function<T>& func,
@@ -54,6 +61,10 @@ struct newton_with_search : public optimizer<T> {
     }
 };
 
+/**
+ * Implementation of Newton method with one dimensional search to find
+ * and determining whether the p vector is valid direction
+ */
 template <typename T, template <typename> class Method = BrentMethod>
 struct newton_with_descent : public optimizer<T> {
     virtual std::pair<Vector<T>, T> find(const multivariate_function<T>& func,
