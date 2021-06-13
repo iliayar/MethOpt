@@ -26,13 +26,14 @@
   - `optimizer.hpp`
 - `lab1/` - графический интерфейс
 - `lab1cli/` - интерфейс для работы с методами из командной строки
+### Визуализация
+#### Windows
 Архив со скомпилированной под Windows программой в [релизе](https://github.com/iliayar/MethOpt/releases/tag/1.1.0)
-### Сборка под Linux
+#### Linux
 - требуется `qt5` и `cmake`
 - `git clone https://github.com/iliayar/MethOpt`
 - `cd MethOpt`
 - `mkdir build && cd build`
 - `cmake ..`
 - `make`
-### Запуск
-Из той же директории `build` `lab1/MetOptLab1`
+- `lab1/MetOptLab1`
